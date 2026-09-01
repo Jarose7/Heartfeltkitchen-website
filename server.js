@@ -9,6 +9,7 @@ const path = require("path");
 const pool = require("./db");
 const buildAdminRouter = require("./admin");
 const { renderTemplate, getSiteContent, getMenuItems, menuItemCardHtml } = require("./lib/render");
+const { sendInquiryToFlodesk } = require("./lib/flodesk");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -151,6 +152,22 @@ app.post("/api/inquiries", async (req, res) => {
       ]
     );
     res.status(201).json({ success: true, inquiry: result.rows[0] });
+
+    // Fire-and-forget: also push this inquiry into Flodesk (if configured)
+    // so Becca can see/act on it there. Intentionally not awaited — this
+    // must never slow down or affect the response above, which is already
+    // sent. Any failure here is logged inside sendInquiryToFlodesk and
+    // never surfaces to the visitor; the database row above is always the
+    // source of truth regardless of whether this succeeds.
+    sendInquiryToFlodesk({
+      inquiry_type,
+      name,
+      email,
+      event_date,
+      guest_count,
+      budget_estimate,
+      notes,
+    });
   } catch (err) {
     console.error("Failed to save inquiry:", err);
     res.status(500).json({ error: "Something went wrong saving your inquiry. Please try again." });

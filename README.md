@@ -98,6 +98,33 @@ and menu items / site content (hours, address, contact info, Instagram
 link) can be edited there — changes show up on the live site immediately,
 no redeploy needed. There's only one login for now (Becca's), by design.
 
+## 7. Connect Flodesk (optional)
+
+The contact/inquiry form always saves to the database and shows up in
+`/admin` regardless of this step — it's a bonus on top, not a
+replacement. When configured, every new inquiry is also pushed into
+Becca's existing Flodesk account as a subscriber tagged into a "Website
+Inquiries" segment, with the inquiry type, event date, guest count,
+budget, and notes attached as custom fields.
+
+**a) Get the API key from Becca's Flodesk account** (requires her paid
+plan): in Flodesk, go to **My Account > Integrations > API keys** and
+click **Create API key**. Copy it immediately — Flodesk only shows it
+once.
+
+**b) Set `FLODESK_API_KEY`** as an environment variable on the Render web
+service, same way as the admin panel's variables.
+
+That's the whole setup on our end — the segment and custom fields get
+created automatically in Flodesk the first time an inquiry comes in.
+
+**One thing this doesn't do:** get this integration into Flodesk doesn't
+by itself make Flodesk email Becca. For that, she needs to build a
+workflow inside Flodesk itself — trigger: subscriber added to the
+"Website Inquiries" segment, action: send her a notification. That's
+configured entirely in Flodesk's own workflow builder, on her account;
+this integration only gets the subscriber in there with the right tag.
+
 ## Local development (optional)
 
 ```
