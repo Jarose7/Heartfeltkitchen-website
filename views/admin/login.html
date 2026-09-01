@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Login — Heartfelt Kitchen &amp; Co.</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin-assets/style.css">
+</head>
+<body class="login-body">
+  <div class="login-card">
+    <div class="login-logo">Heartfelt Kitchen &amp; Co.</div>
+    <p class="login-sub">Admin</p>
+    <form method="POST" action="/admin/login" class="login-form">
+      <label>
+        <span>Username</span>
+        <input type="text" name="username" autocomplete="username" required autofocus>
+      </label>
+      <label>
+        <span>Password</span>
+        <input type="password" name="password" autocomplete="current-password" required>
+      </label>
+      <button type="submit" class="btn-solid">Log in</button>
+    </form>
+    <div id="login-error" class="login-error"></div>
+  </div>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const err = params.get('error');
+    if (err) {
+      const box = document.getElementById('login-error');
+      box.style.display = 'block';
+      box.textContent = err === 'not_configured'
+        ? 'Admin login isn\'t set up yet. See the README for how to set ADMIN_USERNAME and ADMIN_PASSWORD_HASH.'
+        : 'Incorrect username or password.';
+    }
+  </script>
+</body>
+</html>

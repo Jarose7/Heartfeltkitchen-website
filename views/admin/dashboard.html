@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin — Heartfelt Kitchen &amp; Co.</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin-assets/style.css">
+</head>
+<body>
+  <div class="admin-shell">
+    <aside class="admin-sidebar">
+      <div class="sidebar-logo">Heartfelt Kitchen</div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="menu-items">Menu Items</button>
+        <button class="nav-item" data-view="site-content">Site Content</button>
+        <button class="nav-item" data-view="inquiries">Inquiries</button>
+      </nav>
+      <form method="POST" action="/admin/logout" class="sidebar-logout">
+        <button type="submit" class="btn-link">Log out</button>
+      </form>
+    </aside>
+
+    <main class="admin-main">
+
+      <!-- MENU ITEMS VIEW -->
+      <section id="view-menu-items" class="admin-view">
+        <div class="view-head">
+          <div>
+            <h1>Menu Items</h1>
+            <p>Staples and seasonal specials shown on the public menu page.</p>
+          </div>
+          <button class="btn-solid" id="btn-new-item">+ Add Item</button>
+        </div>
+        <div id="menu-items-list" class="item-list"></div>
+      </section>
+
+      <!-- SITE CONTENT VIEW -->
+      <section id="view-site-content" class="admin-view" hidden>
+        <div class="view-head">
+          <div>
+            <h1>Site Content</h1>
+            <p>Hours, contact info, and address shown across the site.</p>
+          </div>
+        </div>
+        <form id="site-content-form" class="content-form">
+          <div class="form-grid">
+            <label><span>Friday hours</span><input type="text" data-key="hours_fri"></label>
+            <label><span>Saturday hours</span><input type="text" data-key="hours_sat"></label>
+            <label><span>Sunday hours</span><input type="text" data-key="hours_sun"></label>
+            <label><span>Phone</span><input type="text" data-key="phone"></label>
+            <label><span>Email</span><input type="text" data-key="email"></label>
+            <label class="full"><span>Address</span><input type="text" data-key="address"></label>
+            <label class="full"><span>Instagram URL</span><input type="text" data-key="instagram_url"></label>
+          </div>
+          <button type="submit" class="btn-solid">Save Changes</button>
+          <div id="content-status" class="status-msg"></div>
+        </form>
+      </section>
+
+      <!-- INQUIRIES VIEW -->
+      <section id="view-inquiries" class="admin-view" hidden>
+        <div class="view-head">
+          <div>
+            <h1>Inquiries</h1>
+            <p>Form submissions from the Submit an Inquiry page, newest first.</p>
+          </div>
+        </div>
+        <div id="inquiries-list" class="inquiries-list"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Item edit modal -->
+  <div id="item-modal" class="modal-overlay" hidden>
+    <div class="modal-card">
+      <h2 id="item-modal-title">Add Menu Item</h2>
+      <form id="item-form">
+        <input type="hidden" id="item-id">
+        <label><span>Name *</span><input type="text" id="item-name" required></label>
+        <label><span>Description</span><textarea id="item-description"></textarea></label>
+        <label><span>Price *</span><input type="text" id="item-price" placeholder="e.g. $3 each, $10 half dozen" required></label>
+        <label><span>Category *</span>
+          <select id="item-category">
+            <option value="staple">Staple</option>
+            <option value="seasonal">Seasonal</option>
+          </select>
+        </label>
+        <label class="checkbox-row"><input type="checkbox" id="item-active" checked><span>Visible on site</span></label>
+        <label><span>Photo</span><input type="file" id="item-photo" accept="image/*"></label>
+        <div id="item-photo-current" class="photo-preview"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn-outline" id="btn-cancel-item">Cancel</button>
+          <button type="submit" class="btn-solid">Save Item</button>
+        </div>
+        <div id="item-form-status" class="status-msg"></div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/admin-assets/dashboard.js"></script>
+</body>
+</html>

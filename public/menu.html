@@ -41,27 +41,21 @@
 
   <section class="wrap">
     <div class="menu-note">
-      <p><strong>This page is a placeholder.</strong> Becca's full menu, pricing, allergen info, and photos are on the way — this structure is ready to drop that content into as soon as it arrives. In-person bakery pricing and online/shipped pricing will be shown separately, since they differ (shipped items include Priority Express shipping cost).</p>
+      <p>Custom cakes, weddings, and catering are quoted per order — <a href="/contact" style="text-decoration:underline;">submit an inquiry</a> for pricing. In-person bakery pricing may differ from online/shipped pricing, since shipped items include Priority Express shipping cost.</p>
     </div>
 
     <div class="menu-section">
-      <h2>Custom Cakes</h2>
-      <div class="menu-placeholder-row">Pricing depends on size, design, and occasion — submit an inquiry for a quote. <a href="/contact" style="text-decoration:underline;">Start an inquiry →</a></div>
-    </div>
-
-    <div class="menu-section">
-      <h2>Cupcakes</h2>
-      <div class="menu-placeholder-row">[Placeholder — flavors, pricing, and photos pending from Becca]</div>
-    </div>
-
-    <div class="menu-section">
-      <h2>Cookies</h2>
-      <div class="menu-placeholder-row">[Placeholder — in-person and shipped pricing pending from Becca; cookies ship to all 50 states]</div>
+      <h2>Menu Staples</h2>
+      <div class="menu-item-grid">
+        {{RAW_MENU_STAPLES}}
+      </div>
     </div>
 
     <div class="menu-section">
       <h2>Seasonal / Monthly Specials</h2>
-      <div class="menu-placeholder-row">[Placeholder — rotates monthly; Becca photographs each batch fresh]</div>
+      <div class="menu-item-grid">
+        {{RAW_MENU_SEASONAL}}
+      </div>
     </div>
   </section>
 
@@ -81,11 +75,11 @@
             <img src="/images/logo-light.png" alt="Heartfelt Kitchen & Co. logo" style="height:38px;">
             <div class="wordmark" style="font-size:15px;">Heartfelt Kitchen &amp; Co.</div>
           </div>
-          <p style="color:#e2d3c1;">261 South Ave., Canton, PA 17724</p>
+          <p style="color:#e2d3c1;">{{address}}</p>
         </div>
-        <div><h4>Visit</h4><p>Fri 2–7pm</p><p>Sat 10am–7pm</p><p>Sun 2–7pm</p></div>
-        <div><h4>Contact</h4><p>602-341-4511</p><p>heartfeltkitchen@gmail.com</p></div>
-        <div><h4>Follow</h4><a href="https://instagram.com/heartfeltkitchen.co">Instagram</a></div>
+        <div><h4>Visit</h4><p>{{hours_fri}}</p><p>{{hours_sat}}</p><p>{{hours_sun}}</p></div>
+        <div><h4>Contact</h4><p>{{phone}}</p><p>{{email}}</p></div>
+        <div><h4>Follow</h4><a href="{{instagram_url}}">Instagram</a></div>
       </div>
       <div class="foot-bottom">
         <span>© 2026 Heartfelt Kitchen &amp; Co. · Est. 2021</span>

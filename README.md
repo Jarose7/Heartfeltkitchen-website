@@ -65,6 +65,39 @@ service.
 Once step 4 works, add the custom domain in Render and point Namecheap's
 DNS at it — see the separate DNS walkthrough for the exact records.
 
+## 6. Set up the admin panel (heartfeltkitchen.co/admin)
+
+The admin panel needs one more schema file and three environment variables.
+Nothing here runs automatically — you run it once, by hand, same as step 3.
+
+**a) Run the admin schema.** Same way as `schema.sql` — via `render psql`
+or Render's Shell tab:
+
+```
+render psql <your-db-id>
+\i schema-admin.sql
+```
+
+**b) Generate a password hash.** Run this locally (after `npm install`),
+swapping in the real password:
+
+```
+node -e "console.log(require('bcryptjs').hashSync('YOUR_PASSWORD_HERE', 10))"
+```
+
+**c) Set environment variables on the Render web service** (Dashboard ->
+your service -> Environment):
+
+- `SESSION_SECRET` — any long random string (e.g. generate one with
+  `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`)
+- `ADMIN_USERNAME` — whatever username Becca wants to log in with
+- `ADMIN_PASSWORD_HASH` — the hash generated in step (b), not the plain password
+
+Once those are set and the service redeploys, `/admin` is live. Log in,
+and menu items / site content (hours, address, contact info, Instagram
+link) can be edited there — changes show up on the live site immediately,
+no redeploy needed. There's only one login for now (Becca's), by design.
+
 ## Local development (optional)
 
 ```
