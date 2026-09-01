@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Submit an Inquiry — Heartfelt Kitchen &amp; Co.</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <div class="utility">Pickup at 261 South Ave., Canton, PA · Shipping available on select items</div>
+
+  <header>
+    <div class="logo">
+      <img src="/images/logo-dark.png" alt="Heartfelt Kitchen & Co. logo">
+      <div class="wordmark">Heartfelt Kitchen &amp; Co.</div>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="/menu.html">Menu</a></li>
+        <li><a href="/events.html">Events</a></li>
+        <li><a href="/catering.html">Catering</a></li>
+        <li><a href="/classes.html">Classes</a></li>
+        <li><a href="/about.html">About</a></li>
+      </ul>
+    </nav>
+    <div class="header-right">
+      <a href="/contact.html" class="pill pill-solid">Submit an Inquiry</a>
+    </div>
+  </header>
+
+  <section class="page-hero">
+    <div class="wrap">
+      <div class="eyebrow" style="margin-bottom:12px;">Get in touch</div>
+      <h1>Submit an Inquiry</h1>
+      <p>Tell us about your wedding, custom cake, catering, or class request and Becca will follow up directly. The more detail you can give, the faster we can put together an estimate.</p>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="form-wrap">
+      <form id="inquiry-form">
+        <div class="form-grid">
+          <div class="form-field full">
+            <label for="inquiry_type">What are you inquiring about? *</label>
+            <select id="inquiry_type" name="inquiry_type" required>
+              <option value="" disabled selected>Select one</option>
+              <option value="wedding">Wedding cake</option>
+              <option value="custom_cake">Custom cake / birthday</option>
+              <option value="catering">Catering / event</option>
+              <option value="class">Class / private class booking</option>
+              <option value="general">General question</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="name">Name *</label>
+            <input type="text" id="name" name="name" required>
+          </div>
+          <div class="form-field">
+            <label for="email">Email *</label>
+            <input type="email" id="email" name="email" required>
+          </div>
+
+          <div class="form-field">
+            <label for="phone">Phone</label>
+            <input type="tel" id="phone" name="phone">
+          </div>
+          <div class="form-field">
+            <label for="event_date">Event / need-by date</label>
+            <input type="date" id="event_date" name="event_date">
+          </div>
+
+          <div class="form-field">
+            <label for="event_location">Event location</label>
+            <input type="text" id="event_location" name="event_location" placeholder="Venue or city">
+          </div>
+          <div class="form-field">
+            <label for="guest_count">Guest count</label>
+            <input type="number" id="guest_count" name="guest_count" min="1">
+          </div>
+
+          <div class="form-field full">
+            <label for="products_requested">What are you looking for?</label>
+            <textarea id="products_requested" name="products_requested" placeholder="e.g. 3-tier wedding cake, chocolate and vanilla, feeds ~80"></textarea>
+          </div>
+
+          <div class="form-field">
+            <label for="budget_estimate">Estimated budget</label>
+            <input type="text" id="budget_estimate" name="budget_estimate" placeholder="e.g. $300–500">
+          </div>
+          <div class="form-field">
+            <label for="delivery_or_pickup">Delivery or pickup?</label>
+            <select id="delivery_or_pickup" name="delivery_or_pickup">
+              <option value="" disabled selected>Select one</option>
+              <option value="pickup">Pickup — Canton, PA</option>
+              <option value="delivery">Delivery</option>
+              <option value="shipping">Shipping</option>
+              <option value="unsure">Not sure yet</option>
+            </select>
+          </div>
+
+          <div class="form-field full">
+            <label for="notes">Anything else we should know?</label>
+            <textarea id="notes" name="notes" placeholder="Allergies, inspiration photos you'll send separately, theme, colors, etc."></textarea>
+          </div>
+        </div>
+
+        <button type="submit" class="pill pill-solid form-submit">Submit Inquiry</button>
+        <p class="form-note">Becca typically responds within a few days. Fields marked * are required.</p>
+        <div id="form-status"></div>
+      </form>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div class="foot-grid">
+        <div>
+          <div class="logo" style="margin-bottom:14px;">
+            <img src="/images/logo-light.png" alt="Heartfelt Kitchen & Co. logo" style="height:38px;">
+            <div class="wordmark" style="font-size:15px;">Heartfelt Kitchen &amp; Co.</div>
+          </div>
+          <p style="color:#e2d3c1;">261 South Ave., Canton, PA 17724</p>
+        </div>
+        <div><h4>Visit</h4><p>Fri 2–7pm</p><p>Sat 10am–7pm</p><p>Sun 2–7pm</p></div>
+        <div><h4>Contact</h4><p>602-341-4511</p><p>heartfeltkitchen@gmail.com</p></div>
+        <div><h4>Follow</h4><a href="https://instagram.com/heartfeltkitchen.co">Instagram</a></div>
+      </div>
+      <div class="foot-bottom">
+        <span>© 2026 Heartfelt Kitchen &amp; Co. · Est. 2021</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const form = document.getElementById('inquiry-form');
+    const statusBox = document.getElementById('form-status');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      statusBox.className = '';
+      statusBox.textContent = '';
+
+      const data = Object.fromEntries(new FormData(form).entries());
+      // Drop empty optional fields so the backend stores clean nulls.
+      Object.keys(data).forEach((k) => { if (data[k] === '') delete data[k]; });
+
+      const submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting…';
+
+      try {
+        const res = await fetch('/api/inquiries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const result = await res.json();
+
+        if (res.ok) {
+          statusBox.className = 'success';
+          statusBox.textContent = "Thanks — your inquiry was submitted. Becca will follow up soon.";
+          form.reset();
+        } else {
+          statusBox.className = 'error';
+          statusBox.textContent = result.error || 'Something went wrong submitting your inquiry. Please try again.';
+        }
+      } catch (err) {
+        statusBox.className = 'error';
+        statusBox.textContent = 'Something went wrong submitting your inquiry. Please try again or email heartfeltkitchen@gmail.com directly.';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Inquiry';
+      }
+    });
+  </script>
+
+</body>
+</html>
