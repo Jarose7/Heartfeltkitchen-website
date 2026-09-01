@@ -6,8 +6,6 @@
 require("dotenv").config();
 const express = require("express");
 const path = require("path");
-const session = require("express-session");
-const pgSession = require("connect-pg-simple")(session);
 const pool = require("./db");
 const buildAdminRouter = require("./admin");
 const { renderTemplate, getSiteContent, getMenuItems, menuItemCardHtml } = require("./lib/render");
@@ -19,20 +17,10 @@ const PUBLIC_DIR = path.join(__dirname, "public");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Sessions for the admin panel only (public site pages don't touch this).
-// Session rows live in the "session" table created by schema-admin.sql —
-// createTableIfMissing is left off on purpose so nothing auto-migrates.
-app.use(
-  session({
-    store: new pgSession({ pool, createTableIfMissing: false }),
-    secret: process.env.SESSION_SECRET || "dev-only-secret-change-in-render-env",
-    resave: false,
-    saveUninitialized: false,
-    cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 }, // 30 days
-  })
-);
-
 // Admin panel routes (login, dashboard, /api/admin/*, /menu-photo/:id).
+// Sessions are scoped inside this router (see admin.js) rather than
+// mounted globally, so a session-store issue can never take down the
+// public site pages below — only admin routes depend on sessions.
 app.use(buildAdminRouter(pool));
 
 // Clean URLs: redirect any request ending in ".html" to the extensionless
@@ -167,6 +155,15 @@ app.post("/api/inquiries", async (req, res) => {
     console.error("Failed to save inquiry:", err);
     res.status(500).json({ error: "Something went wrong saving your inquiry. Please try again." });
   }
+});
+
+// Catch-all error handler — last resort so an unexpected error anywhere
+// (including inside session/auth middleware) logs clearly on the server
+// and shows a plain but non-broken message, instead of a bare crash page.
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err);
+  if (res.headersSent) return next(err);
+  res.status(500).send("Something went wrong on our end. Please try again in a moment.");
 });
 
 app.listen(PORT, () => {
