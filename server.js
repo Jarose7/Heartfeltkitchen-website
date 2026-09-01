@@ -14,9 +14,21 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files (HTML/CSS/images) from a "public" folder.
+// Clean URLs: redirect any request ending in ".html" to the extensionless
+// version (e.g. /about.html -> /about), so the address bar never shows
+// ".html" and there's one canonical URL per page.
+app.use((req, res, next) => {
+  if (req.path.endsWith(".html") && req.path !== "/index.html") {
+    const cleanPath = req.path.slice(0, -".html".length);
+    return res.redirect(301, cleanPath + req.url.slice(req.path.length));
+  }
+  next();
+});
+
+// Serve static files (HTML/CSS/images) from a "public" folder, resolving
+// extensionless routes to their .html file (e.g. /about -> about.html).
 // Drop the finished site pages in there once they're ready.
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public"), { extensions: ["html"] }));
 
 // Simple health check — visiting this confirms the server AND the database
 // connection are both working. Good first thing to check after deploying.
