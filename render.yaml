@@ -1,0 +1,23 @@
+# render.yaml — Render "Blueprint" spec.
+# This lets you create the web service AND the database together in one
+# step on Render (New + -> Blueprint) instead of setting each one up by
+# hand. See README.md for the full walkthrough.
+
+databases:
+  - name: hkc-database
+    plan: basic-256mb
+    region: oregon
+
+services:
+  - type: web
+    name: heartfelt-kitchen-website
+    runtime: node
+    plan: starter
+    region: oregon
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: hkc-database
+          property: connectionString
