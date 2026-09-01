@@ -22,6 +22,36 @@ h1,h2{font-family:'Montserrat',sans-serif;font-weight:700;margin:0;}
 .login-form input{padding:11px 14px;border:1.5px solid var(--line);font-family:'Manrope',sans-serif;font-size:14px;}
 .login-form input:focus{outline:none;border-color:var(--cocoa);}
 .login-error{display:none;margin-top:16px;background:var(--danger-bg);color:var(--danger);font-size:13px;padding:10px 14px;}
+.login-card{transition:opacity .25s ease;}
+
+/* ---- login loading animation ---- */
+.login-loader{
+  position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:18px;background:var(--cream);opacity:0;transition:opacity .3s ease;
+}
+.login-loader.is-visible{opacity:1;}
+.whisk-scene{position:relative;width:88px;height:88px;}
+.whisk-spin{animation:whisk-stir 0.9s ease-in-out infinite;}
+@keyframes whisk-stir{
+  0%{transform:rotate(0deg);}
+  50%{transform:rotate(180deg);}
+  100%{transform:rotate(360deg);}
+}
+.whisk-crumb{
+  position:absolute;top:8px;width:6px;height:6px;border-radius:50%;background:var(--tan);
+  animation:whisk-crumb-pop 0.9s ease-in-out infinite;
+}
+.crumb-1{left:14px;animation-delay:0s;}
+.crumb-2{left:44px;animation-delay:.2s;}
+.crumb-3{left:70px;animation-delay:.4s;}
+@keyframes whisk-crumb-pop{
+  0%,100%{transform:translateY(0);opacity:0;}
+  50%{transform:translateY(-14px);opacity:1;}
+}
+.whisk-caption{
+  font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--cocoa);
+}
 
 /* ---- shell ---- */
 .admin-shell{display:flex;min-height:100vh;}

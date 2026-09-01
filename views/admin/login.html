@@ -10,10 +10,10 @@
 <link rel="stylesheet" href="/admin-assets/style.css">
 </head>
 <body class="login-body">
-  <div class="login-card">
+  <div class="login-card" id="login-card">
     <div class="login-logo">Heartfelt Kitchen &amp; Co.</div>
     <p class="login-sub">Admin</p>
-    <form method="POST" action="/admin/login" class="login-form">
+    <form method="POST" action="/admin/login" class="login-form" id="login-form">
       <label>
         <span>Username</span>
         <input type="text" name="username" autocomplete="username" required autofocus>
@@ -22,10 +22,29 @@
         <span>Password</span>
         <input type="password" name="password" autocomplete="current-password" required>
       </label>
-      <button type="submit" class="btn-solid">Log in</button>
+      <button type="submit" class="btn-solid" id="login-submit">Log in</button>
     </form>
     <div id="login-error" class="login-error"></div>
   </div>
+
+  <div class="login-loader" id="login-loader" hidden aria-hidden="true">
+    <div class="whisk-scene">
+      <svg class="whisk-bowl" viewBox="0 0 120 120" width="88" height="88">
+        <circle cx="60" cy="60" r="46" fill="none" stroke="var(--tan)" stroke-width="3" opacity="0.4"/>
+        <g class="whisk-spin" style="transform-origin:60px 60px;">
+          <path d="M60 26 C 46 40, 46 80, 60 94" fill="none" stroke="var(--cocoa)" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M60 26 C 74 40, 74 80, 60 94" fill="none" stroke="var(--cocoa)" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M60 26 C 60 46, 60 74, 60 94" fill="none" stroke="var(--cocoa)" stroke-width="3.5" stroke-linecap="round"/>
+          <circle cx="60" cy="26" r="3.5" fill="var(--cocoa)"/>
+        </g>
+      </svg>
+      <span class="whisk-crumb crumb-1"></span>
+      <span class="whisk-crumb crumb-2"></span>
+      <span class="whisk-crumb crumb-3"></span>
+    </div>
+    <p class="whisk-caption">Whisking you in&hellip;</p>
+  </div>
+
   <script>
     const params = new URLSearchParams(window.location.search);
     const err = params.get('error');
@@ -36,6 +55,29 @@
         ? 'Admin login isn\'t set up yet. See the README for how to set ADMIN_USERNAME and ADMIN_PASSWORD_HASH.'
         : 'Incorrect username or password.';
     }
+
+    // Purely cosmetic: play a short bakery-themed loading animation before
+    // the form actually submits. Auth/session logic is untouched — this
+    // just delays the real POST by ~1s so the animation has time to play,
+    // then submits the form normally (server still does the redirect).
+    const form = document.getElementById('login-form');
+    const loader = document.getElementById('login-loader');
+    const card = document.getElementById('login-card');
+    const submitBtn = document.getElementById('login-submit');
+    let submitting = false;
+
+    form.addEventListener('submit', (e) => {
+      if (submitting) return; // second click while animating: let it through
+      if (!form.checkValidity()) return; // let native validation messages show
+      e.preventDefault();
+      submitting = true;
+      submitBtn.textContent = 'Logging in…';
+      submitBtn.disabled = true;
+      card.style.opacity = '0';
+      loader.hidden = false;
+      requestAnimationFrame(() => loader.classList.add('is-visible'));
+      setTimeout(() => form.submit(), 1000);
+    });
   </script>
 </body>
 </html>
