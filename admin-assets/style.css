@@ -25,11 +25,16 @@ h1,h2{font-family:'Montserrat',sans-serif;font-weight:700;margin:0;}
 .login-card{transition:opacity .25s ease;}
 
 /* ---- login loading animation ---- */
+/* display:none is the real hidden state (not just the [hidden] attribute)
+   so this can never sit invisibly on top of the form intercepting clicks —
+   that was the bug reported 2026-09-01: opacity:0 alone still blocks the
+   mouse even when nothing is visible, only display:none removes it from
+   hit-testing entirely. */
 .login-loader{
-  position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:18px;background:var(--cream);opacity:0;transition:opacity .3s ease;
+  display:none;position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:center;
+  gap:18px;background:var(--cream);opacity:0;transition:opacity .3s ease;pointer-events:none;
 }
-.login-loader.is-visible{opacity:1;}
+.login-loader.is-visible{display:flex;opacity:1;pointer-events:auto;}
 .whisk-scene{position:relative;width:88px;height:88px;}
 .whisk-spin{animation:whisk-stir 0.9s ease-in-out infinite;}
 @keyframes whisk-stir{
