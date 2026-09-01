@@ -15,4 +15,21 @@ const pool = new Pool({
     : false,
 });
 
+// node-postgres emits 'error' on the pool when an already-connected, idle
+// client hits a problem (e.g. the backend restarts it). Without a listener
+// here, that event has no handler and can crash the whole Node process.
+// This just logs it so a transient DB blip degrades gracefully instead of
+// taking the server down.
+pool.on("error", (err) => {
+  console.error("[db] Unexpected error on idle Postgres client:", err);
+});
+
+console.log(
+  "[db] Pool configured — DATABASE_URL set:",
+  !!process.env.DATABASE_URL,
+  process.env.DATABASE_URL
+    ? `(host: ${new URL(process.env.DATABASE_URL).hostname})`
+    : ""
+);
+
 module.exports = pool;

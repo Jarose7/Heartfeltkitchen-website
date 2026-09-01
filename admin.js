@@ -57,9 +57,41 @@ function buildAdminRouter(pool) {
   // affected; the public site (home, menu, about, etc.) never touches
   // sessions at all and keeps working regardless. This is the fix for the
   // 2026-09-01 incident where logging in broke the entire public site.
+  //
+  // TEMPORARY DIAGNOSTIC (2026-09-01): production logs show the session
+  // store's internal PGStore hitting ECONNREFUSED on 127.0.0.1/::1:5432 —
+  // the exact behavior connect-pg-simple falls back to when it DIDN'T
+  // receive a `pool` at construction time and made its own unconfigured
+  // one. That contradicts this file passing a real, working pool (the same
+  // one /health uses successfully). Logging pool identity here at boot,
+  // and overriding errorLog, to get direct proof of what's actually
+  // happening in Render's environment instead of guessing further.
+  console.log(
+    "[admin] session store setup — pool defined:",
+    !!pool,
+    "| has query fn:",
+    !!(pool && typeof pool.query === "function"),
+    "| has connectionString:",
+    !!(pool && pool.options && pool.options.connectionString),
+    "| totalCount/idleCount:",
+    pool ? `${pool.totalCount}/${pool.idleCount}` : "n/a"
+  );
+
+  const sessionStore = new pgSession({
+    pool,
+    createTableIfMissing: false,
+    errorLog: (...args) => {
+      // If this ever prints "PG Pool error" or "Failed to prune sessions",
+      // that proves connect-pg-simple built its OWN internal pool (i.e.
+      // options.pool was undefined when it was constructed) rather than
+      // using ours — which would mean the bug is upstream of this file.
+      console.error("[connect-pg-simple]", ...args);
+    },
+  });
+
   router.use(
     session({
-      store: new pgSession({ pool, createTableIfMissing: false }),
+      store: sessionStore,
       secret: process.env.SESSION_SECRET || "dev-only-secret-change-in-render-env",
       resave: false,
       saveUninitialized: false,
