@@ -162,6 +162,13 @@
 
     const url = URL.createObjectURL(file);
     imgEl.onload = () => {
+      // The modal (and therefore the viewport inside it) must actually be
+      // visible BEFORE measuring it — getBoundingClientRect() on a
+      // display:none element returns 0x0, which was making baseScale and
+      // the image's rendered size come out as 0 (i.e. an invisible image
+      // over the viewport's dark background — the "all black" bug).
+      modal.hidden = false;
+
       naturalW = imgEl.naturalWidth;
       naturalH = imgEl.naturalHeight;
 
@@ -176,7 +183,6 @@
 
       zoomSlider.value = 1;
       applyTransform();
-      modal.hidden = false;
       URL.revokeObjectURL(url);
     };
     imgEl.src = url;
