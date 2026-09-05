@@ -46,6 +46,7 @@ const dynamicPages = {
   "/events": "events.html",
   "/catering": "catering.html",
   "/classes": "classes.html",
+  "/policies": "policies.html",
 };
 
 Object.entries(dynamicPages).forEach(([route, file]) => {

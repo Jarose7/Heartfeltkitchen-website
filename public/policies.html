@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Policies — Heartfelt Kitchen &amp; Co.</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  .policy-section{max-width:720px;margin-bottom:56px;}
+  .policy-section:last-of-type{margin-bottom:0;}
+  .policy-section h2{font-size:22px;text-transform:uppercase;margin-bottom:18px;}
+  .policy-section p{font-size:14.5px;color:#5a4433;line-height:1.7;margin-bottom:14px;}
+  .policy-section ul{margin:0 0 14px;padding-left:20px;}
+  .policy-section li{font-size:14.5px;color:#5a4433;line-height:1.7;margin-bottom:8px;}
+  .policy-note{background:var(--cream);border:1px solid var(--line);padding:20px 24px;font-size:13.5px;color:#6b5c4c;}
+</style>
+</head>
+<body>
+
+  <div class="utility">Pickup at 261 South Ave., Canton, PA · Shipping available on select items</div>
+
+  <header>
+    <a href="/" class="logo" aria-label="Heartfelt Kitchen & Co. — Home">
+      <img src="/images/logo-dark.png" alt="Heartfelt Kitchen & Co. logo">
+      <div class="wordmark">Heartfelt Kitchen &amp; Co.</div>
+    </a>
+    <nav>
+      <ul>
+        <li><a href="/menu">Menu</a></li>
+        <li><a href="/events">Events</a></li>
+        <li><a href="/catering">Catering</a></li>
+        <li><a href="/classes">Classes</a></li>
+        <li><a href="/about">About</a></li>
+      </ul>
+    </nav>
+    <div class="header-right">
+      <a href="/contact" class="pill pill-solid">Submit an Inquiry</a>
+    </div>
+  </header>
+
+  <section class="page-hero">
+    <div class="wrap">
+      <div class="eyebrow" style="margin-bottom:12px;">Good to know before you book</div>
+      <h1>Policies</h1>
+      <p>Our deposit, cancellation, and allergen policies for custom orders. Questions about anything below? Reach out and we're happy to talk it through.</p>
+    </div>
+  </section>
+
+  <section class="wrap" style="padding-top:56px;padding-bottom:64px;">
+    <div class="policy-section">
+      <h2>Deposit &amp; Cancellation Policy</h2>
+      <p>This policy applies to custom cakes, wedding cakes, and event orders booked directly with Becca.</p>
+      <ul>
+        <li>A 50% deposit is required to book and confirm your order.</li>
+        <li>The remaining balance is due at pickup or delivery.</li>
+        <li>Your deposit is <strong>refundable</strong> if you cancel at least 2 weeks before your event date, and before ingredients have been purchased or work has begun on your order.</li>
+        <li>Your deposit is <strong>non-refundable</strong> if canceled with less than 2 weeks' notice, or after ingredients have been purchased or work has started — the deposit covers ingredient costs and the time reserved for your order.</li>
+      </ul>
+      <div class="policy-note">Have questions about a standard bakery order, a class, or a shipped item? These aren't covered by the policy above — <a href="/contact" style="text-decoration:underline;">reach out directly</a> and we'll sort it out together.</div>
+    </div>
+
+    <div class="policy-section">
+      <h2>Allergen Disclaimer</h2>
+      <p>Our products are made in a kitchen that also handles wheat, dairy, eggs, tree nuts, peanuts, and soy. While we take care in preparing every order, we cannot guarantee that any item is completely free of allergens due to shared equipment and the possibility of cross-contact.</p>
+      <p>If you have a food allergy or dietary restriction, please let us know before ordering so we can talk through what will and won't work for you.</p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div class="foot-grid">
+        <div>
+          <div class="logo" style="margin-bottom:14px;">
+            <img src="/images/logo-light.png" alt="Heartfelt Kitchen & Co. logo" style="height:38px;">
+            <div class="wordmark" style="font-size:15px;">Heartfelt Kitchen &amp; Co.</div>
+          </div>
+          <p style="color:#e2d3c1;">{{address}}</p>
+        </div>
+        <div><h4>Visit</h4><p>{{hours_fri}}</p><p>{{hours_sat}}</p><p>{{hours_sun}}</p></div>
+        <div><h4>Contact</h4><p>{{phone}}</p><p>{{email}}</p></div>
+        <div><h4>Follow</h4><a href="{{instagram_url}}">Instagram</a></div>
+      </div>
+      <div class="foot-bottom">
+        <span>© 2026 Heartfelt Kitchen &amp; Co. · Est. 2021</span>
+        <a href="/policies" style="color:#c9baa4;">Policies</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
