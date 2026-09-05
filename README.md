@@ -133,33 +133,32 @@ also sends an email with every field the visitor filled out (inquiry
 type, name, contact info, event details, budget, notes, all of it) to
 **jackroseblue@gmail.com** and **heartfeltkitchen@gmail.com**.
 
-This uses Gmail's own SMTP server to send — no new service, no
-signup, no cost. It's not meant for high-volume mail, but that's not
-what this is; a bakery's inquiry form is nowhere near Gmail's sending
-limits.
+This uses Brevo's SMTP relay to send. Brevo has a free tier (300
+emails/day), which is far more than a bakery inquiry form needs.
 
-**a) Pick which Gmail account sends the notification.** Becca's
-**heartfeltkitchen@gmail.com** makes the most sense, so the email
-actually looks like it's coming from the business, but any Gmail
-account works.
+**a) Create a free Brevo account** (or use Becca's, if she has one) at
+[brevo.com](https://www.brevo.com).
 
-**b) Turn on 2-Step Verification** on that Google account, if it isn't
-already (Google Account > Security > 2-Step Verification) — Gmail
-requires this before it'll issue an App Password.
+**b) Verify a sender email.** In Brevo, go to **Senders, Domains &
+Dedicated IPs > Senders > Add a sender**, and add the address that
+should appear as the "from" — **heartfeltkitchen@gmail.com** makes the
+most sense so the email looks like it's coming from the business.
+Brevo emails a 6-digit code to that address to confirm you own it;
+Brevo won't relay mail from an unverified sender.
 
-**c) Generate an App Password** at
-[myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords).
-Give it a label like "Heartfelt Kitchen Website" and copy the 16-character
-password it generates — this is different from the account's normal
-login password, and it's the only thing that should ever go in the
-environment variable below (never the real Google password).
+**c) Generate an SMTP key.** Go to **Transactional > Settings >
+SMTP relay**, and click **Generate a new SMTP key**. Note the **SMTP
+login** shown on that same page too — it's a separate value from the
+key itself. (This SMTP key is different from Brevo's API key used
+elsewhere in their dashboard — make sure you're copying the SMTP key,
+not the API key.)
 
-**d) Set two environment variables** on the Render web service:
-- `GMAIL_USER` — the Gmail address from step (a)
-- `GMAIL_APP_PASSWORD` — the App Password from step (c)
+**d) Set three environment variables** on the Render web service:
+- `BREVO_SMTP_LOGIN` — the SMTP login from step (c)
+- `BREVO_SMTP_KEY` — the SMTP key from step (c)
+- `BREVO_FROM_EMAIL` — the verified sender address from step (b)
 
-That's the whole setup — no code changes needed, nothing to configure
-inside Gmail beyond the App Password itself.
+That's the whole setup — no code changes needed.
 
 ## Local development (optional)
 
