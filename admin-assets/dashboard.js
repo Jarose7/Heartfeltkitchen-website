@@ -33,6 +33,29 @@
   const modal = document.getElementById('item-modal');
   const itemForm = document.getElementById('item-form');
   const itemFormStatus = document.getElementById('item-form-status');
+  const itemPhotoInput = document.getElementById('item-photo');
+  const itemPhotoCurrent = document.getElementById('item-photo-current');
+
+  // Holds the cropped photo Blob once the crop tool has been used, so the
+  // form submits the CROPPED image rather than the raw file the browser's
+  // file picker returned. Cleared whenever the modal opens/closes so a
+  // stale crop from a previous item can never leak into a different one.
+  let croppedPhotoBlob = null;
+
+  itemPhotoInput.addEventListener('change', () => {
+    const file = itemPhotoInput.files[0];
+    if (!file) return;
+    openImageCropper(file, { aspect: 4 / 3 }, (blob) => {
+      if (!blob) {
+        // Canceled — don't leave a raw, un-cropped file selected.
+        itemPhotoInput.value = '';
+        return;
+      }
+      croppedPhotoBlob = blob;
+      const url = URL.createObjectURL(blob);
+      itemPhotoCurrent.innerHTML = `New photo (cropped): <img src="${url}" alt="">`;
+    });
+  });
 
   async function loadMenuItems() {
     listEl.innerHTML = '<div class="empty-state">Loading…</div>';
@@ -85,9 +108,9 @@
     document.getElementById('item-price').value = item ? (item.price_text || '') : '';
     document.getElementById('item-category').value = item ? item.category : 'staple';
     document.getElementById('item-active').checked = item ? item.active : true;
-    document.getElementById('item-photo').value = '';
-    const currentPhoto = document.getElementById('item-photo-current');
-    currentPhoto.innerHTML = (item && item.has_photo)
+    itemPhotoInput.value = '';
+    croppedPhotoBlob = null;
+    itemPhotoCurrent.innerHTML = (item && item.has_photo)
       ? `Current photo: <img src="/menu-photo/${item.id}" alt="">`
       : '';
     modal.hidden = false;
@@ -118,8 +141,9 @@
     formData.append('price_text', price);
     formData.append('category', document.getElementById('item-category').value);
     formData.append('active', document.getElementById('item-active').checked ? 'true' : 'false');
-    const photoFile = document.getElementById('item-photo').files[0];
-    if (photoFile) formData.append('photo', photoFile);
+    // Always the cropped result, never the raw file the picker returned —
+    // croppedPhotoBlob is only set once the crop tool has been used.
+    if (croppedPhotoBlob) formData.append('photo', croppedPhotoBlob, 'photo.jpg');
 
     const submitBtn = itemForm.querySelector('button[type="submit"]');
     submitBtn.disabled = true;

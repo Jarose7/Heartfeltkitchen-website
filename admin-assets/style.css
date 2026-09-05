@@ -133,6 +133,17 @@ h1,h2{font-family:'Montserrat',sans-serif;font-weight:700;margin:0;}
 .photo-preview img{max-width:100px;display:block;margin-top:6px;border:1px solid var(--line);}
 .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:6px;}
 
+/* ---- photo crop tool ---- */
+.crop-modal-card{max-width:560px;}
+.crop-viewport{
+  position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;
+  background:#1a120b;margin:0 auto 16px;cursor:grab;border:1px solid var(--line);
+  touch-action:none;
+}
+.crop-viewport.dragging{cursor:grabbing;}
+.crop-viewport img{position:absolute;top:0;left:0;max-width:none;max-height:none;user-select:none;pointer-events:none;}
+#crop-zoom{width:100%;margin-bottom:20px;accent-color:var(--cocoa);}
+
 @media (max-width:760px){
   .admin-shell{flex-direction:column;}
   .admin-sidebar{width:100%;flex-direction:row;align-items:center;padding:14px 16px;}
