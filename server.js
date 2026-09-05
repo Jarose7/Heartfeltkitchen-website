@@ -10,6 +10,7 @@ const pool = require("./db");
 const buildAdminRouter = require("./admin");
 const { renderTemplate, getSiteContent, getMenuItems, menuItemCardHtml } = require("./lib/render");
 const { sendInquiryToFlodesk } = require("./lib/flodesk");
+const { sendInquiryNotification } = require("./lib/email");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -167,6 +168,26 @@ app.post("/api/inquiries", async (req, res) => {
       event_date,
       guest_count,
       budget_estimate,
+      notes,
+    });
+
+    // Also fire-and-forget an email notification with the full inquiry —
+    // every field the visitor filled out, not just a subset — to both
+    // Jack and Becca. Same non-blocking, never-fails-the-request pattern
+    // as the Flodesk call above.
+    sendInquiryNotification({
+      id: result.rows[0].id,
+      created_at: result.rows[0].created_at,
+      inquiry_type,
+      name,
+      email,
+      phone,
+      event_date,
+      event_location,
+      guest_count,
+      products_requested,
+      budget_estimate,
+      delivery_or_pickup,
       notes,
     });
   } catch (err) {

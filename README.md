@@ -125,6 +125,42 @@ workflow inside Flodesk itself — trigger: subscriber added to the
 configured entirely in Flodesk's own workflow builder, on her account;
 this integration only gets the subscriber in there with the right tag.
 
+## 8. Email notifications on new inquiries (optional)
+
+Same deal as Flodesk — the inquiry always saves to the database and
+shows up in `/admin` regardless. When configured, every new inquiry
+also sends an email with every field the visitor filled out (inquiry
+type, name, contact info, event details, budget, notes, all of it) to
+**jackroseblue@gmail.com** and **heartfeltkitchen@gmail.com**.
+
+This uses Gmail's own SMTP server to send — no new service, no
+signup, no cost. It's not meant for high-volume mail, but that's not
+what this is; a bakery's inquiry form is nowhere near Gmail's sending
+limits.
+
+**a) Pick which Gmail account sends the notification.** Becca's
+**heartfeltkitchen@gmail.com** makes the most sense, so the email
+actually looks like it's coming from the business, but any Gmail
+account works.
+
+**b) Turn on 2-Step Verification** on that Google account, if it isn't
+already (Google Account > Security > 2-Step Verification) — Gmail
+requires this before it'll issue an App Password.
+
+**c) Generate an App Password** at
+[myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords).
+Give it a label like "Heartfelt Kitchen Website" and copy the 16-character
+password it generates — this is different from the account's normal
+login password, and it's the only thing that should ever go in the
+environment variable below (never the real Google password).
+
+**d) Set two environment variables** on the Render web service:
+- `GMAIL_USER` — the Gmail address from step (a)
+- `GMAIL_APP_PASSWORD` — the App Password from step (c)
+
+That's the whole setup — no code changes needed, nothing to configure
+inside Gmail beyond the App Password itself.
+
 ## Local development (optional)
 
 ```
