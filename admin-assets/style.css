@@ -119,6 +119,9 @@ h1,h2{font-family:'Montserrat',sans-serif;font-weight:700;margin:0;}
 .inquiry-card dl{display:grid;grid-template-columns:120px 1fr;gap:6px 10px;font-size:13px;margin-top:10px;}
 .inquiry-card dt{color:#8a7862;}
 .inquiry-card dd{margin:0;}
+.inquiry-actions{display:flex;justify-content:flex-end;margin-top:12px;}
+.inquiry-actions button{all:unset;cursor:pointer;font-size:12.5px;font-weight:600;color:#6b5c4c;}
+.inquiry-actions .delete-btn:hover{color:var(--danger);}
 
 /* ---- modal ---- */
 .modal-overlay{position:fixed;inset:0;background:rgba(20,12,7,0.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px;}

@@ -249,7 +249,7 @@
       return;
     }
     inquiriesList.innerHTML = rows.map((r) => `
-      <div class="inquiry-card">
+      <div class="inquiry-card" data-id="${r.id}">
         <div class="top">
           <span>${escapeHtml(r.inquiry_type)}</span>
           <span>${new Date(r.created_at).toLocaleString()}</span>
@@ -266,8 +266,28 @@
           ${r.delivery_or_pickup ? `<dt>Delivery/pickup</dt><dd>${escapeHtml(r.delivery_or_pickup)}</dd>` : ''}
           ${r.notes ? `<dt>Notes</dt><dd>${escapeHtml(r.notes)}</dd>` : ''}
         </dl>
+        <div class="inquiry-actions">
+          <button class="delete-btn">Delete</button>
+        </div>
       </div>
     `).join('');
+
+    inquiriesList.querySelectorAll('.inquiry-card').forEach((card) => {
+      const id = card.dataset.id;
+      const row = rows.find((r) => String(r.id) === id);
+      card.querySelector('.delete-btn').addEventListener('click', () => deleteInquiry(id, row ? row.name : ''));
+    });
+  }
+
+  async function deleteInquiry(id, name) {
+    if (!confirm(`Delete the inquiry from "${name}"? This can't be undone.`)) return;
+    try {
+      const res = await fetch(`/api/admin/inquiries/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error();
+      loadInquiries();
+    } catch (err) {
+      alert('Failed to delete this inquiry. Try again.');
+    }
   }
 
   // initial load

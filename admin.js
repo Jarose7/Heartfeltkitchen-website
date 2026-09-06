@@ -311,6 +311,16 @@ function buildAdminRouter(pool) {
     }
   });
 
+  router.delete("/api/admin/inquiries/:id", requireAdminApi, async (req, res) => {
+    try {
+      await pool.query("DELETE FROM inquiries WHERE id=$1", [req.params.id]);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Failed to delete inquiry:", err);
+      res.status(500).json({ error: "Failed to delete inquiry." });
+    }
+  });
+
   return router;
 }
 
