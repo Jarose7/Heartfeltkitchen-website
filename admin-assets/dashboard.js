@@ -74,7 +74,20 @@
       listEl.innerHTML = '<div class="empty-state">No menu items yet. Click "Add Item" to create one.</div>';
       return;
     }
-    listEl.innerHTML = items.map((item) => `
+    // Items arrive already ordered by category, sort_order, name — group
+    // by category here just to know each item's position within its own
+    // category, so the up/down arrows can disable at the top/bottom.
+    const byCategory = {};
+    items.forEach((item) => {
+      (byCategory[item.category] = byCategory[item.category] || []).push(item);
+    });
+
+    listEl.innerHTML = items.map((item) => {
+      const siblings = byCategory[item.category];
+      const posInCategory = siblings.findIndex((i) => i.id === item.id);
+      const isFirst = posInCategory === 0;
+      const isLast = posInCategory === siblings.length - 1;
+      return `
       <div class="item-row" data-id="${item.id}">
         <div class="item-thumb" style="${item.has_photo ? `background-image:url('/menu-photo/${item.id}')` : ''}"></div>
         <div class="item-info">
@@ -84,18 +97,37 @@
         <span class="badge ${item.category === 'seasonal' ? 'badge-seasonal' : 'badge-staple'}">${item.category}</span>
         ${!item.active ? '<span class="badge badge-hidden">Hidden</span>' : ''}
         <div class="item-actions">
+          <button class="move-btn move-up" title="Move up" ${isFirst ? 'disabled' : ''}>&uarr;</button>
+          <button class="move-btn move-down" title="Move down" ${isLast ? 'disabled' : ''}>&darr;</button>
           <button class="edit-btn">Edit</button>
           <button class="delete-btn">Delete</button>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     listEl.querySelectorAll('.item-row').forEach((row) => {
       const id = row.dataset.id;
       const item = items.find((i) => String(i.id) === id);
       row.querySelector('.edit-btn').addEventListener('click', () => openItemModal(item));
       row.querySelector('.delete-btn').addEventListener('click', () => deleteItem(id, item.name));
+      row.querySelector('.move-up').addEventListener('click', () => moveItem(id, 'up'));
+      row.querySelector('.move-down').addEventListener('click', () => moveItem(id, 'down'));
     });
+  }
+
+  async function moveItem(id, direction) {
+    try {
+      const res = await fetch(`/api/admin/menu-items/${id}/move`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ direction }),
+      });
+      if (!res.ok) throw new Error();
+      loadMenuItems();
+    } catch (err) {
+      alert('Failed to reorder this item. Try again.');
+    }
   }
 
   function openItemModal(item) {
@@ -230,6 +262,9 @@
   // ---- inquiries -------------------------------------------------------
 
   const inquiriesList = document.getElementById('inquiries-list');
+  const inquiriesSearch = document.getElementById('inquiries-search');
+  const inquiriesTypeFilter = document.getElementById('inquiries-type-filter');
+  let allInquiries = [];
 
   async function loadInquiries() {
     inquiriesList.innerHTML = '<div class="empty-state">Loading…</div>';
@@ -237,15 +272,33 @@
       const res = await fetch('/api/admin/inquiries');
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to load');
-      renderInquiries(data.inquiries);
+      allInquiries = data.inquiries;
+      applyInquiriesFilter();
     } catch (err) {
       inquiriesList.innerHTML = '<div class="empty-state">Couldn\'t load inquiries. Try refreshing.</div>';
     }
   }
 
-  function renderInquiries(rows) {
+  function applyInquiriesFilter() {
+    const term = inquiriesSearch.value.trim().toLowerCase();
+    const type = inquiriesTypeFilter.value;
+    const filtered = allInquiries.filter((r) => {
+      if (type && r.inquiry_type !== type) return false;
+      if (!term) return true;
+      const haystack = [r.name, r.email, r.notes].filter(Boolean).join(' ').toLowerCase();
+      return haystack.includes(term);
+    });
+    renderInquiries(filtered, allInquiries.length);
+  }
+
+  inquiriesSearch.addEventListener('input', applyInquiriesFilter);
+  inquiriesTypeFilter.addEventListener('change', applyInquiriesFilter);
+
+  function renderInquiries(rows, totalCount) {
     if (rows.length === 0) {
-      inquiriesList.innerHTML = '<div class="empty-state">No inquiries yet.</div>';
+      inquiriesList.innerHTML = totalCount
+        ? '<div class="empty-state">No inquiries match your search.</div>'
+        : '<div class="empty-state">No inquiries yet.</div>';
       return;
     }
     inquiriesList.innerHTML = rows.map((r) => `

@@ -8,7 +8,7 @@ const express = require("express");
 const path = require("path");
 const pool = require("./db");
 const buildAdminRouter = require("./admin");
-const { renderTemplate, getSiteContent, getMenuItems, menuItemCardHtml } = require("./lib/render");
+const { renderTemplate, getSiteContent, getMenuItems, menuItemCardHtml, textBlockToHtml } = require("./lib/render");
 const { sendInquiryToFlodesk } = require("./lib/flodesk");
 const { sendInquiryNotification } = require("./lib/email");
 
@@ -50,11 +50,47 @@ const dynamicPages = {
   "/policies": "policies.html",
 };
 
+// Fallback copy for the About and Policies paragraphs that are now
+// editable from Site Content — this is exactly what each page already
+// said, so nothing changes visually until Jack actually edits a field.
+const ABOUT_FALLBACKS = {
+  about_hero_text: "Heartfelt Kitchen & Co. is a working bakery kitchen inside a historic home in Canton, Pennsylvania, run by Becca Horton.",
+  about_story_p1: "Becca has been baking for about 12 years, entirely self-taught. She started Heartfelt Kitchen & Co. in 2021 around five things: custom cakes, cupcakes, cookies, classes, and catering; the 5 C's.",
+  about_story_p2: "She also teaches culinary programs at the college level, and that experience carries straight into the kitchen. It's part of why there's a full class schedule running alongside the wedding cakes and catering orders.",
+  about_story_p3: "Selling baked goods was never really the point. Becca built Heartfelt Kitchen to be a place where people gather, celebrate, learn, and create around food.",
+  about_philosophy_text: "Every cake, cookie box, and hands-on class comes from the same idea: food is better shared. Whether it's a wedding cake, a Saturday baking class, or a full catering spread, the goal is the same — bring people into the kitchen, not just send them home with a box.",
+};
+const POLICY_FALLBACKS = {
+  policy_deposit_text: "This policy applies to custom cakes, wedding cakes, and event orders booked directly with Becca.\n\n- A 50% deposit is required to book and confirm your order.\n- The remaining balance is due at pickup or delivery.\n- Your deposit is **non-refundable**, regardless of when you cancel — it covers ingredient costs secured for your order as soon as it's booked.",
+  policy_allergen_text: "Our products are made in a kitchen that also handles wheat, dairy, eggs, tree nuts, peanuts, and soy. While we take care in preparing every order, we cannot guarantee that any item is completely free of allergens due to shared equipment and the possibility of cross-contact.\n\nIf you have a food allergy or dietary restriction, please let us know before ordering so we can talk through what will and won't work for you.",
+};
+
+// Builds the extra {{RAW_...}} fragments a given route's template needs,
+// on top of the plain site_content fields every page already gets.
+function buildPageExtras(route, content) {
+  if (route === "/about") {
+    return {
+      RAW_ABOUT_HERO: textBlockToHtml(content.about_hero_text, ABOUT_FALLBACKS.about_hero_text),
+      RAW_ABOUT_STORY_P1: textBlockToHtml(content.about_story_p1, ABOUT_FALLBACKS.about_story_p1),
+      RAW_ABOUT_STORY_P2: textBlockToHtml(content.about_story_p2, ABOUT_FALLBACKS.about_story_p2),
+      RAW_ABOUT_STORY_P3: textBlockToHtml(content.about_story_p3, ABOUT_FALLBACKS.about_story_p3),
+      RAW_ABOUT_PHILOSOPHY: textBlockToHtml(content.about_philosophy_text, ABOUT_FALLBACKS.about_philosophy_text),
+    };
+  }
+  if (route === "/policies") {
+    return {
+      RAW_POLICY_DEPOSIT: textBlockToHtml(content.policy_deposit_text, POLICY_FALLBACKS.policy_deposit_text),
+      RAW_POLICY_ALLERGEN: textBlockToHtml(content.policy_allergen_text, POLICY_FALLBACKS.policy_allergen_text),
+    };
+  }
+  return {};
+}
+
 Object.entries(dynamicPages).forEach(([route, file]) => {
   app.get(route, async (req, res, next) => {
     try {
       const content = await getSiteContent(pool);
-      const html = renderTemplate(path.join(PUBLIC_DIR, file), content);
+      const html = renderTemplate(path.join(PUBLIC_DIR, file), { ...content, ...buildPageExtras(route, content) });
       res.send(html);
     } catch (err) {
       next(); // fall through to static file serving as a last resort

@@ -55,6 +55,24 @@
             <label class="full"><span>Address</span><input type="text" data-key="address"></label>
             <label class="full"><span>Instagram URL</span><input type="text" data-key="instagram_url"></label>
           </div>
+
+          <h2 class="form-section-label">About Page</h2>
+          <p class="form-section-hint">Separate paragraphs with a blank line. Wrap words in **double asterisks** to bold them.</p>
+          <div class="form-grid">
+            <label class="full"><span>Hero intro (under the main headline)</span><textarea data-key="about_hero_text"></textarea></label>
+            <label class="full"><span>Story — paragraph 1</span><textarea data-key="about_story_p1"></textarea></label>
+            <label class="full"><span>Story — paragraph 2</span><textarea data-key="about_story_p2"></textarea></label>
+            <label class="full"><span>Story — paragraph 3</span><textarea data-key="about_story_p3"></textarea></label>
+            <label class="full"><span>Philosophy paragraph</span><textarea data-key="about_philosophy_text"></textarea></label>
+          </div>
+
+          <h2 class="form-section-label">Policies Page</h2>
+          <p class="form-section-hint">Start a line with "- " to make it a bullet point. Separate paragraphs with a blank line.</p>
+          <div class="form-grid">
+            <label class="full"><span>Deposit &amp; Cancellation Policy</span><textarea data-key="policy_deposit_text"></textarea></label>
+            <label class="full"><span>Allergen Disclaimer</span><textarea data-key="policy_allergen_text"></textarea></label>
+          </div>
+
           <button type="submit" class="btn-solid">Save Changes</button>
           <div id="content-status" class="status-msg"></div>
         </form>
@@ -67,6 +85,17 @@
             <h1>Inquiries</h1>
             <p>Form submissions from the Submit an Inquiry page, newest first.</p>
           </div>
+        </div>
+        <div class="inquiries-filters">
+          <input type="text" id="inquiries-search" placeholder="Search name, email, or notes…">
+          <select id="inquiries-type-filter">
+            <option value="">All types</option>
+            <option value="wedding">Wedding cake</option>
+            <option value="custom_cake">Custom cake / birthday</option>
+            <option value="catering">Catering / event</option>
+            <option value="class">Class / private class booking</option>
+            <option value="general">General question</option>
+          </select>
         </div>
         <div id="inquiries-list" class="inquiries-list"></div>
       </section>

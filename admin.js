@@ -262,6 +262,49 @@ function buildAdminRouter(pool) {
     }
   });
 
+  // Moves an item up or down within its own category (staple/seasonal),
+  // renumbering sort_order for the whole category so the move always
+  // takes effect even if every item currently shares the same sort_order.
+  router.post("/api/admin/menu-items/:id/move", requireAdminApi, express.json(), async (req, res) => {
+    const { id } = req.params;
+    const { direction } = req.body || {};
+    if (direction !== "up" && direction !== "down") {
+      return res.status(400).json({ error: "direction must be 'up' or 'down'." });
+    }
+    try {
+      const itemResult = await pool.query("SELECT category FROM menu_items WHERE id=$1", [id]);
+      if (itemResult.rows.length === 0) {
+        return res.status(404).json({ error: "Item not found." });
+      }
+      const { category } = itemResult.rows[0];
+
+      const listResult = await pool.query(
+        "SELECT id FROM menu_items WHERE category=$1 ORDER BY sort_order, name, id",
+        [category]
+      );
+      const ids = listResult.rows.map((row) => row.id);
+      const index = ids.findIndex((rowId) => String(rowId) === String(id));
+      if (index === -1) {
+        return res.status(404).json({ error: "Item not found." });
+      }
+
+      const swapWith = direction === "up" ? index - 1 : index + 1;
+      if (swapWith < 0 || swapWith >= ids.length) {
+        // Already at the top/bottom of its category — nothing to do.
+        return res.json({ success: true });
+      }
+      [ids[index], ids[swapWith]] = [ids[swapWith], ids[index]];
+
+      for (let i = 0; i < ids.length; i++) {
+        await pool.query("UPDATE menu_items SET sort_order=$1 WHERE id=$2", [(i + 1) * 10, ids[i]]);
+      }
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Failed to reorder menu item:", err);
+      res.status(500).json({ error: "Failed to reorder menu item." });
+    }
+  });
+
   // ---- site content API ------------------------------------------------
 
   router.get("/api/admin/site-content", requireAdminApi, async (req, res) => {

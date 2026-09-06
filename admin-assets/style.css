@@ -96,6 +96,8 @@ h1,h2{font-family:'Montserrat',sans-serif;font-weight:700;margin:0;}
 .item-actions button{all:unset;cursor:pointer;font-size:12.5px;font-weight:600;color:#6b5c4c;}
 .item-actions button:hover{color:var(--cocoa);}
 .item-actions .delete-btn:hover{color:var(--danger);}
+.item-actions button:disabled{opacity:.3;cursor:default;}
+.item-actions button:disabled:hover{color:#6b5c4c;}
 .empty-state{padding:40px 12px;text-align:center;color:#8a7862;font-size:14px;}
 
 /* ---- forms ---- */
@@ -107,12 +109,20 @@ h1,h2{font-family:'Montserrat',sans-serif;font-weight:700;margin:0;}
   padding:10px 13px;border:1.5px solid var(--line);font-family:'Manrope',sans-serif;font-size:14px;color:var(--cocoa);background:var(--white);
 }
 .content-form input:focus,#item-form input:focus,#item-form textarea:focus,#item-form select:focus{outline:none;border-color:var(--cocoa);}
+.content-form textarea{min-height:90px;resize:vertical;}
+.form-section-label{font-size:16px;margin:28px 0 4px;text-transform:uppercase;letter-spacing:.03em;}
+.content-form .form-section-label:first-of-type{margin-top:28px;}
+.form-section-hint{font-size:12.5px;color:#8a7862;margin:0 0 14px;}
 .status-msg{margin-top:14px;font-size:13px;display:none;padding:10px 14px;}
 .status-msg.success{display:block;background:#eaf0e4;color:#3a5a2c;}
 .status-msg.error{display:block;background:var(--danger-bg);color:var(--danger);}
 
 /* ---- inquiries ---- */
 .inquiries-list{display:flex;flex-direction:column;gap:12px;}
+.inquiries-filters{display:flex;gap:12px;margin-bottom:18px;}
+.inquiries-filters input{flex:1;padding:10px 14px;border:1px solid var(--line);font-family:inherit;font-size:13.5px;}
+.inquiries-filters select{padding:10px 14px;border:1px solid var(--line);font-family:inherit;font-size:13.5px;background:var(--white);}
+.inquiries-filters input:focus,.inquiries-filters select:focus{outline:none;border-color:var(--cocoa);}
 .inquiry-card{background:var(--white);border:1px solid var(--line);padding:18px 20px;}
 .inquiry-card .top{display:flex;justify-content:space-between;font-size:13px;color:#8a7862;margin-bottom:8px;}
 .inquiry-card .name{font-weight:700;font-size:15px;}
