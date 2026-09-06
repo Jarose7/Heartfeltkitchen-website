@@ -1,11 +1,20 @@
 // admin.js — Heartfelt Kitchen & Co. admin panel routes.
-// Single admin login (no multi-user management, per Jack's scope decision
-// on 2026-09-01). Credentials live in Render environment variables, never
-// in code or the database: ADMIN_USERNAME, ADMIN_PASSWORD_HASH.
 //
-// All schema changes this file depends on live in schema-admin.sql, which
-// Jack runs manually against the live database. Nothing here creates or
-// alters tables automatically.
+// Login checks two places, in order:
+//   1. The admin_users table (multi-user support, added when Jack asked
+//      for a second login — see schema-admin-users.sql). Each row is a
+//      username + a bcrypt password hash.
+//   2. The original single-account env vars (ADMIN_USERNAME,
+//      ADMIN_PASSWORD_HASH), kept as a fallback so whoever was already
+//      logging in before multi-user support existed keeps working
+//      without needing a new row created for them.
+// If admin_users doesn't exist yet (schema-admin-users.sql hasn't been
+// run), the table lookup fails safely and login falls through to #2 — so
+// deploying this code is safe before or after that SQL file gets run.
+//
+// All schema changes this file depends on live in schema-admin.sql and
+// schema-admin-users.sql, which Jack runs manually against the live
+// database. Nothing here creates or alters tables automatically.
 
 const path = require("path");
 const fs = require("fs");
@@ -25,6 +34,34 @@ const upload = multer({
     cb(null, true);
   },
 });
+
+async function checkAdminCredentials(pool, username, password) {
+  if (!username || !password) return false;
+
+  // 1. admin_users table.
+  try {
+    const result = await pool.query(
+      "SELECT password_hash FROM admin_users WHERE username = $1",
+      [username]
+    );
+    if (result.rows[0]) {
+      return await bcrypt.compare(password, result.rows[0].password_hash);
+    }
+  } catch (lookupErr) {
+    // Most likely admin_users doesn't exist yet (schema-admin-users.sql
+    // not run yet) — that's fine, fall through to the legacy check below.
+    console.warn("[admin] admin_users lookup failed, falling back to legacy env var login:", lookupErr.message);
+  }
+
+  // 2. Legacy single-account env vars.
+  const legacyUser = process.env.ADMIN_USERNAME;
+  const legacyHash = process.env.ADMIN_PASSWORD_HASH;
+  if (legacyUser && legacyHash && username === legacyUser) {
+    return await bcrypt.compare(password, legacyHash);
+  }
+
+  return false;
+}
 
 function buildAdminRouter(pool) {
   const router = express.Router();
@@ -57,34 +94,10 @@ function buildAdminRouter(pool) {
   // affected; the public site (home, menu, about, etc.) never touches
   // sessions at all and keeps working regardless. This is the fix for the
   // 2026-09-01 incident where logging in broke the entire public site.
-  //
-  // TEMPORARY DIAGNOSTIC (2026-09-01): production logs show the session
-  // store's internal PGStore hitting ECONNREFUSED on 127.0.0.1/::1:5432 —
-  // the exact behavior connect-pg-simple falls back to when it DIDN'T
-  // receive a `pool` at construction time and made its own unconfigured
-  // one. That contradicts this file passing a real, working pool (the same
-  // one /health uses successfully). Logging pool identity here at boot,
-  // and overriding errorLog, to get direct proof of what's actually
-  // happening in Render's environment instead of guessing further.
-  console.log(
-    "[admin] session store setup — pool defined:",
-    !!pool,
-    "| has query fn:",
-    !!(pool && typeof pool.query === "function"),
-    "| has connectionString:",
-    !!(pool && pool.options && pool.options.connectionString),
-    "| totalCount/idleCount:",
-    pool ? `${pool.totalCount}/${pool.idleCount}` : "n/a"
-  );
-
   const sessionStore = new pgSession({
     pool,
     createTableIfMissing: false,
     errorLog: (...args) => {
-      // If this ever prints "PG Pool error" or "Failed to prune sessions",
-      // that proves connect-pg-simple built its OWN internal pool (i.e.
-      // options.pool was undefined when it was constructed) rather than
-      // using ours — which would mean the bug is upstream of this file.
       console.error("[connect-pg-simple]", ...args);
     },
   });
@@ -120,18 +133,8 @@ function buildAdminRouter(pool) {
 
   router.post("/admin/login", express.urlencoded({ extended: true }), async (req, res) => {
     const { username, password } = req.body;
-    const adminUser = process.env.ADMIN_USERNAME;
-    const adminHash = process.env.ADMIN_PASSWORD_HASH;
-
-    if (!adminUser || !adminHash) {
-      return res.redirect("/admin/login?error=not_configured");
-    }
-    if (!username || !password || username !== adminUser) {
-      return res.redirect("/admin/login?error=1");
-    }
-
     try {
-      const ok = await bcrypt.compare(password, adminHash);
+      const ok = await checkAdminCredentials(pool, username, password);
       if (!ok) return res.redirect("/admin/login?error=1");
       req.session.isAdmin = true;
       req.session.username = username;

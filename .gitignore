@@ -3,3 +3,4 @@ node_modules/
 .render-db.env
 .DS_Store
 npm-debug.log
+add-admin-*.sql
