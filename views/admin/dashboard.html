@@ -136,11 +136,11 @@
   <div id="crop-modal" class="modal-overlay" hidden>
     <div class="modal-card crop-modal-card">
       <h2>Adjust Photo</h2>
-      <p class="photo-preview" style="margin-bottom:14px;">Drag to reposition, scroll or use the slider to zoom. This is exactly what will show on the menu.</p>
+      <p class="photo-preview" style="margin-bottom:14px;">Drag to reposition, scroll or use the slider to zoom. Zooming out past the photo's edges adds white space around it. This is exactly what will show on the menu.</p>
       <div class="crop-viewport" id="crop-viewport">
         <img id="crop-image" draggable="false" alt="">
       </div>
-      <input type="range" id="crop-zoom" min="1" max="3" step="0.01" value="1">
+      <input type="range" id="crop-zoom" min="0.5" max="3" step="0.01" value="1">
       <div class="modal-actions">
         <button type="button" class="btn-outline" id="btn-cancel-crop">Cancel</button>
         <button type="button" class="btn-solid" id="btn-use-crop">Use This Crop</button>

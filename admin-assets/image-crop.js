@@ -42,9 +42,13 @@
   function clampPosition() {
     const w = naturalW * baseScale * scale;
     const h = naturalH * baseScale * scale;
-    // Image must always fully cover the viewport — no gaps at any edge.
-    left = clamp(left, viewportW - w, 0);
-    top = clamp(top, viewportH - h, 0);
+    // At scale 1 and above the image still covers the viewport on that
+    // axis — keep it pinned with no gaps, same as before. Below that
+    // (zoomed out past the photo's own edges) there's nothing to pan to,
+    // so just center it — the empty space around it becomes white padding
+    // when the crop is exported (see btnUse below).
+    left = w >= viewportW ? clamp(left, viewportW - w, 0) : (viewportW - w) / 2;
+    top = h >= viewportH ? clamp(top, viewportH - h, 0) : (viewportH - h) / 2;
   }
 
   function setScale(newScale, anchorX, anchorY) {
@@ -56,7 +60,7 @@
     const relX = (anchorX - left) / oldW;
     const relY = (anchorY - top) / oldH;
 
-    scale = clamp(newScale, 1, 3);
+    scale = clamp(newScale, 0.5, 3);
 
     const newW = naturalW * baseScale * scale;
     const newH = naturalH * baseScale * scale;
@@ -139,7 +143,30 @@
     canvas.width = outputW;
     canvas.height = outputH;
     const ctx = canvas.getContext('2d');
-    ctx.drawImage(imgEl, cropX, cropY, cropW, cropH, 0, 0, outputW, outputH);
+    // Fill white first — when zoomed out past the photo's edges, the crop
+    // rectangle extends beyond the actual image, and that extra area
+    // becomes white padding instead of being left blank/transparent.
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, outputW, outputH);
+
+    // Only draw the part of the crop rectangle that actually overlaps the
+    // source image — drawImage requires its source rectangle to lie
+    // within the image, so we intersect manually rather than passing the
+    // (possibly out-of-bounds) crop rectangle straight through.
+    const scaleOut = outputW / cropW;
+    const ix0 = Math.max(cropX, 0);
+    const iy0 = Math.max(cropY, 0);
+    const ix1 = Math.min(cropX + cropW, naturalW);
+    const iy1 = Math.min(cropY + cropH, naturalH);
+    if (ix1 > ix0 && iy1 > iy0) {
+      const dx = (ix0 - cropX) * scaleOut;
+      const dy = (iy0 - cropY) * scaleOut;
+      ctx.drawImage(
+        imgEl,
+        ix0, iy0, ix1 - ix0, iy1 - iy0,
+        dx, dy, (ix1 - ix0) * scaleOut, (iy1 - iy0) * scaleOut
+      );
+    }
 
     canvas.toBlob((blob) => {
       modal.hidden = true;
