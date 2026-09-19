@@ -42,6 +42,16 @@
   // stale crop from a previous item can never leak into a different one.
   let croppedPhotoBlob = null;
 
+  // /menu-photo/:id is cached for an hour (it rarely changes), so the URL
+  // needs to change whenever the photo does, or the browser just keeps
+  // showing the old one after a save — this is why replacing a photo
+  // looked like it "didn't take." Using updated_at as a ?v= query string
+  // fixes that without giving up the caching.
+  function photoUrl(item) {
+    const v = item.updated_at ? new Date(item.updated_at).getTime() : '';
+    return `/menu-photo/${item.id}${v ? `?v=${v}` : ''}`;
+  }
+
   itemPhotoInput.addEventListener('change', () => {
     const file = itemPhotoInput.files[0];
     if (!file) return;
@@ -89,7 +99,7 @@
       const isLast = posInCategory === siblings.length - 1;
       return `
       <div class="item-row" data-id="${item.id}">
-        <div class="item-thumb" style="${item.has_photo ? `background-image:url('/menu-photo/${item.id}')` : ''}"></div>
+        <div class="item-thumb" style="${item.has_photo ? `background-image:url('${photoUrl(item)}')` : ''}"></div>
         <div class="item-info">
           <div class="name">${escapeHtml(item.name)}</div>
           <div class="meta">${escapeHtml(item.price_text || '')}</div>
@@ -143,7 +153,7 @@
     itemPhotoInput.value = '';
     croppedPhotoBlob = null;
     itemPhotoCurrent.innerHTML = (item && item.has_photo)
-      ? `Current photo: <img src="/menu-photo/${item.id}" alt="">`
+      ? `Current photo: <img src="${photoUrl(item)}" alt="">`
       : '';
     modal.hidden = false;
   }
