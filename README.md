@@ -160,6 +160,20 @@ not the API key.)
 
 That's the whole setup — no code changes needed.
 
+## 9. Load real menu items (one-time)
+
+Two SQL files add the "Shippable / Online Shop" menu category and seed the
+real menu/pricing Becca sent on 2026-09-16. Run both once, the same way as
+`schema-admin.sql` — via `render psql <db-id>` then `\i <file>`, or paste
+into Render's database Shell tab:
+
+1. `schema-menu-shippable.sql` — widens the `menu_items` category check
+   constraint to also allow `'shippable'` (existing rows are untouched).
+2. `seed-menu-items.sql` — inserts the actual staples, seasonal specials,
+   and shippable items. **Run this only once** — it isn't idempotent, so
+   running it twice duplicates every item. After this, manage menu items
+   going forward through `/admin`, not by re-running the SQL file.
+
 ## Local development (optional)
 
 ```

@@ -94,7 +94,7 @@
           <div class="name">${escapeHtml(item.name)}</div>
           <div class="meta">${escapeHtml(item.price_text || '')}</div>
         </div>
-        <span class="badge ${item.category === 'seasonal' ? 'badge-seasonal' : 'badge-staple'}">${item.category}</span>
+        <span class="badge badge-${item.category === 'seasonal' ? 'seasonal' : item.category === 'shippable' ? 'shippable' : 'staple'}">${item.category}</span>
         ${!item.active ? '<span class="badge badge-hidden">Hidden</span>' : ''}
         <div class="item-actions">
           <button class="move-btn move-up" title="Move up" ${isFirst ? 'disabled' : ''}>&uarr;</button>

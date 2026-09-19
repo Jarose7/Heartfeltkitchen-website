@@ -103,28 +103,34 @@ app.get("/menu", async (req, res, next) => {
     const content = await getSiteContent(pool);
     const items = await getMenuItems(pool);
 
-    let staples, seasonal;
+    let staples, seasonal, shippable;
     if (items === null) {
       // Admin schema not applied yet — keep the site working with a
       // friendly placeholder instead of an empty page.
       const placeholder = '<p style="color:#8a7862;font-size:14px;grid-column:1/-1;">Menu items coming soon — <a href="/contact" style="text-decoration:underline;">submit an inquiry</a> in the meantime.</p>';
       staples = placeholder;
       seasonal = placeholder;
+      shippable = placeholder;
     } else {
       const staplesItems = items.filter((i) => i.category === "staple");
       const seasonalItems = items.filter((i) => i.category === "seasonal");
+      const shippableItems = items.filter((i) => i.category === "shippable");
       staples = staplesItems.length
         ? staplesItems.map(menuItemCardHtml).join("")
         : '<p style="color:#8a7862;font-size:14px;grid-column:1/-1;">Staples are being added — check back soon.</p>';
       seasonal = seasonalItems.length
         ? seasonalItems.map(menuItemCardHtml).join("")
         : '<p style="color:#8a7862;font-size:14px;grid-column:1/-1;">No seasonal specials posted yet — check back soon.</p>';
+      shippable = shippableItems.length
+        ? shippableItems.map(menuItemCardHtml).join("")
+        : '<p style="color:#8a7862;font-size:14px;grid-column:1/-1;">Shippable items are being added — check back soon.</p>';
     }
 
     const html = renderTemplate(path.join(PUBLIC_DIR, "menu.html"), {
       ...content,
       RAW_MENU_STAPLES: staples,
       RAW_MENU_SEASONAL: seasonal,
+      RAW_MENU_SHIPPABLE: shippable,
     });
     res.send(html);
   } catch (err) {
