@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Submit an Inquiry — Heartfelt Kitchen &amp; Co.</title>
+<title>Submit an Inquiry | Heartfelt Kitchen &amp; Co.</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
@@ -13,7 +13,7 @@
   <div class="utility">Pickup at 261 South Ave., Canton, PA · Shipping available on select items</div>
 
   <header>
-    <a href="/" class="logo" aria-label="Heartfelt Kitchen & Co. — Home">
+    <a href="/" class="logo" aria-label="Heartfelt Kitchen & Co. home">
       <img src="/images/logo-dark.png" alt="Heartfelt Kitchen & Co. logo">
       <div class="wordmark">Heartfelt Kitchen &amp; Co.</div>
     </a>
@@ -95,7 +95,7 @@
             <label for="delivery_or_pickup">Delivery or pickup?</label>
             <select id="delivery_or_pickup" name="delivery_or_pickup">
               <option value="" disabled selected>Select one</option>
-              <option value="pickup">Pickup — Canton, PA</option>
+              <option value="pickup">Pickup (Canton, PA)</option>
               <option value="delivery">Delivery</option>
               <option value="shipping">Shipping</option>
               <option value="unsure">Not sure yet</option>
@@ -109,7 +109,7 @@
         </div>
 
         <button type="submit" class="pill pill-solid form-submit">Submit Inquiry</button>
-        <p class="form-note">Becca typically responds within a few days. Fields marked * are required. Custom cake, wedding, and event orders require a 50% deposit to book — see our <a href="/policies" style="text-decoration:underline;">deposit &amp; cancellation policy</a> for details.</p>
+        <p class="form-note">Becca typically responds within a few days. Fields marked * are required. Custom cake, wedding, and event orders require a 50% deposit to book. See our <a href="/policies" style="text-decoration:underline;">deposit &amp; cancellation policy</a> for details.</p>
         <div id="form-status"></div>
       </form>
     </div>
@@ -163,7 +163,7 @@
 
         if (res.ok) {
           statusBox.className = 'success';
-          statusBox.textContent = "Thanks — your inquiry was submitted. Becca will follow up soon.";
+          statusBox.textContent = "Thanks! Your inquiry was submitted. Becca will follow up soon.";
           form.reset();
         } else {
           statusBox.className = 'error';
