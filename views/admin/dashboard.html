@@ -17,6 +17,7 @@
         <button class="nav-item active" data-view="menu-items">Menu Items</button>
         <button class="nav-item" data-view="site-content">Site Content</button>
         <button class="nav-item" data-view="homepage-photos">Site Photos</button>
+        <button class="nav-item" data-view="classes">Classes</button>
         <button class="nav-item" data-view="inquiries">Inquiries</button>
       </nav>
       <form method="POST" action="/admin/logout" class="sidebar-logout">
@@ -90,6 +91,30 @@
         <div id="homepage-photos-list" class="hp-grid"></div>
       </section>
 
+      <!-- CLASSES VIEW -->
+      <section id="view-classes" class="admin-view" hidden>
+        <div class="view-head">
+          <div>
+            <h1>Classes</h1>
+            <p>The real calendar visitors see on the Classes page, plus reusable presets so scheduling a class you already run doesn't mean retyping everything.</p>
+          </div>
+        </div>
+
+        <h2 class="form-section-label" style="margin-top:0;">Presets</h2>
+        <p class="form-section-hint">Pick one of these when adding a class to the calendar to skip straight to just setting a date and time.</p>
+        <div id="class-presets-list" class="hp-grid"></div>
+        <button class="btn-outline" id="btn-new-preset" style="margin-top:16px;">+ Add Preset</button>
+
+        <h2 class="form-section-label">Calendar</h2>
+        <div class="cal-admin-head">
+          <button type="button" class="btn-outline" id="cal-prev">&larr; Prev</button>
+          <div id="cal-month-label" class="cal-month-label"></div>
+          <button type="button" class="btn-outline" id="cal-next">Next &rarr;</button>
+          <button type="button" class="btn-solid" id="btn-new-event" style="margin-left:auto;">+ Add Class</button>
+        </div>
+        <div id="class-calendar" class="cal-grid"></div>
+      </section>
+
       <!-- INQUIRIES VIEW -->
       <section id="view-inquiries" class="admin-view" hidden>
         <div class="view-head">
@@ -140,6 +165,71 @@
           <button type="submit" class="btn-solid">Save Item</button>
         </div>
         <div id="item-form-status" class="status-msg"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Preset edit modal -->
+  <div id="preset-modal" class="modal-overlay" hidden>
+    <div class="modal-card">
+      <h2 id="preset-modal-title">Add Preset</h2>
+      <form id="preset-form">
+        <input type="hidden" id="preset-id">
+        <label><span>Category *</span><input type="text" id="preset-category" placeholder="e.g. Baking, Bread, Chocolate, Global" required></label>
+        <label><span>Title *</span><input type="text" id="preset-title" placeholder="e.g. Foundations of Pastry" required></label>
+        <label><span>Description</span><textarea id="preset-description" placeholder="e.g. Hands-on, in the Canton kitchen"></textarea></label>
+        <label><span>Default price</span><input type="text" id="preset-price" placeholder="e.g. $65 per seat (optional)"></label>
+        <label><span>Photo</span><input type="file" id="preset-photo" accept="image/*"></label>
+        <p class="photo-preview" style="margin-top:-6px;">Optional — shown to visitors if a scheduled class using this preset doesn't have its own photo.</p>
+        <div id="preset-photo-current" class="photo-preview"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn-outline" id="btn-cancel-preset">Cancel</button>
+          <button type="submit" class="btn-solid">Save Preset</button>
+        </div>
+        <div id="preset-form-status" class="status-msg"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- "Add a class" picker — choose a preset to prefill everything, or start blank -->
+  <div id="class-picker-modal" class="modal-overlay" hidden>
+    <div class="modal-card">
+      <h2>Add a Class</h2>
+      <p class="photo-preview" style="margin-bottom:16px;">Start from a preset to skip straight to just picking a date and time, or build a one-off class from scratch.</p>
+      <div id="class-picker-presets" class="picker-preset-list"></div>
+      <div class="modal-actions" style="justify-content:space-between;">
+        <button type="button" class="btn-outline" id="btn-cancel-picker">Cancel</button>
+        <button type="button" class="btn-solid" id="btn-picker-custom">Custom Event</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Class event edit modal -->
+  <div id="event-modal" class="modal-overlay" hidden>
+    <div class="modal-card">
+      <h2 id="event-modal-title">Add Class</h2>
+      <form id="event-form">
+        <input type="hidden" id="event-id">
+        <input type="hidden" id="event-preset-id">
+        <label><span>Category *</span><input type="text" id="event-category" required></label>
+        <label><span>Title *</span><input type="text" id="event-title" required></label>
+        <label><span>Description</span><textarea id="event-description"></textarea></label>
+        <label><span>Price</span><input type="text" id="event-price" placeholder="e.g. $65 per seat"></label>
+        <div class="form-grid" style="margin-bottom:0;">
+          <label><span>Date *</span><input type="date" id="event-date" required></label>
+          <label><span>Start time</span><input type="time" id="event-start-time"></label>
+          <label><span>End time</span><input type="time" id="event-end-time"></label>
+        </div>
+        <label class="checkbox-row"><input type="checkbox" id="event-active" checked><span>Visible on site</span></label>
+        <label><span>Photo</span><input type="file" id="event-photo" accept="image/*"></label>
+        <p class="photo-preview" style="margin-top:-6px;">Picking a photo opens a quick crop tool.</p>
+        <div id="event-photo-current" class="photo-preview"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn-link" id="btn-delete-event" style="margin-right:auto;color:var(--danger);">Delete</button>
+          <button type="button" class="btn-outline" id="btn-cancel-event">Cancel</button>
+          <button type="submit" class="btn-solid">Save Class</button>
+        </div>
+        <div id="event-form-status" class="status-msg"></div>
       </form>
     </div>
   </div>

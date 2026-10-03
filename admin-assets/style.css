@@ -158,6 +158,27 @@ h1,h2{font-family:'Montserrat',sans-serif;font-weight:700;margin:0;}
 .photo-preview img{max-width:100px;display:block;margin-top:6px;border:1px solid var(--line);}
 .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:6px;}
 
+/* ---- classes: presets + calendar ---- */
+.cal-admin-head{display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap;}
+.cal-month-label{font-family:'Montserrat',sans-serif;font-weight:700;font-size:15px;min-width:150px;text-align:center;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+.cal-weekday{background:var(--cream);padding:8px;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#8a7862;}
+.cal-cell{background:var(--white);min-height:104px;padding:6px;cursor:pointer;display:flex;flex-direction:column;gap:4px;}
+.cal-cell:hover{background:var(--cream);}
+.cal-cell.is-outside{background:#faf7f1;}
+.cal-cell .cal-day-num{font-size:12px;font-weight:700;color:#8a7862;}
+.cal-cell.is-outside .cal-day-num{color:#d8cbb8;}
+.cal-cell.is-today .cal-day-num{color:var(--cocoa);text-decoration:underline;}
+.cal-event-chip{all:unset;cursor:pointer;font-size:10.5px;padding:3px 6px;background:var(--cream);color:var(--cocoa);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;}
+.cal-event-chip.is-hidden{opacity:.55;text-decoration:line-through;}
+.cal-event-chip:hover{background:var(--tan);}
+
+.picker-preset-list{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+.picker-preset-btn{all:unset;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border:1.5px solid var(--line);font-size:13.5px;}
+.picker-preset-btn:hover{border-color:var(--cocoa);background:var(--cream);}
+.picker-preset-btn .cat{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#8a7862;font-weight:700;}
+.picker-empty{font-size:13px;color:#8a7862;margin-bottom:18px;}
+
 /* ---- photo crop tool ---- */
 .crop-modal-card{max-width:560px;}
 .crop-viewport{
@@ -176,4 +197,6 @@ h1,h2{font-family:'Montserrat',sans-serif;font-weight:700;margin:0;}
   .sidebar-logout{margin-top:0;}
   .admin-main{padding:24px;}
   .form-grid{grid-template-columns:1fr;}
+  .cal-cell{min-height:64px;font-size:12px;}
+  .cal-weekday{font-size:9px;padding:6px 2px;}
 }

@@ -7,6 +7,7 @@
     'menu-items': document.getElementById('view-menu-items'),
     'site-content': document.getElementById('view-site-content'),
     'homepage-photos': document.getElementById('view-homepage-photos'),
+    'classes': document.getElementById('view-classes'),
     'inquiries': document.getElementById('view-inquiries'),
   };
 
@@ -18,6 +19,7 @@
       if (btn.dataset.view === 'menu-items') loadMenuItems();
       if (btn.dataset.view === 'site-content') loadSiteContent();
       if (btn.dataset.view === 'homepage-photos') loadHomepagePhotos();
+      if (btn.dataset.view === 'classes') loadClassesView();
       if (btn.dataset.view === 'inquiries') loadInquiries();
     });
   });
@@ -348,6 +350,405 @@
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = 'Save Changes';
+    }
+  });
+
+  // ---- classes: presets ---------------------------------------------------
+  // Reusable "class types" (schema-classes.sql) so scheduling another date
+  // for a class Becca already runs doesn't mean retyping everything.
+
+  let classPresets = [];
+
+  const presetsListEl = document.getElementById('class-presets-list');
+  const presetModal = document.getElementById('preset-modal');
+  const presetForm = document.getElementById('preset-form');
+  const presetFormStatus = document.getElementById('preset-form-status');
+  const presetPhotoInput = document.getElementById('preset-photo');
+  const presetPhotoCurrent = document.getElementById('preset-photo-current');
+  let croppedPresetPhotoBlob = null;
+
+  function presetPhotoUrl(preset) {
+    const v = preset.updated_at ? new Date(preset.updated_at).getTime() : '';
+    return `/class-preset-photo/${preset.id}${v ? `?v=${v}` : ''}`;
+  }
+
+  presetPhotoInput.addEventListener('change', () => {
+    const file = presetPhotoInput.files[0];
+    if (!file) return;
+    openImageCropper(file, { aspect: 4 / 3 }, (blob) => {
+      if (!blob) { presetPhotoInput.value = ''; return; }
+      croppedPresetPhotoBlob = blob;
+      const url = URL.createObjectURL(blob);
+      presetPhotoCurrent.innerHTML = `New photo (cropped): <img src="${url}" alt="">`;
+    });
+  });
+
+  async function loadClassPresets() {
+    presetsListEl.innerHTML = '<div class="empty-state">Loading…</div>';
+    try {
+      const res = await fetch('/api/admin/class-presets');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load');
+      classPresets = data.presets;
+      renderClassPresets();
+    } catch (err) {
+      presetsListEl.innerHTML = '<div class="empty-state">Couldn\'t load presets. Try refreshing.</div>';
+    }
+  }
+
+  function renderClassPresets() {
+    if (classPresets.length === 0) {
+      presetsListEl.innerHTML = '<div class="empty-state">No presets yet. Click "Add Preset" to create one.</div>';
+      return;
+    }
+    presetsListEl.innerHTML = classPresets.map((p) => `
+      <div class="hp-card" data-id="${p.id}">
+        <div class="hp-thumb" style="${p.has_photo ? `background-image:url('${presetPhotoUrl(p)}')` : ''}">${p.has_photo ? '' : '<span>No photo</span>'}</div>
+        <div class="hp-label">${escapeHtml(p.category)} — ${escapeHtml(p.title)}</div>
+        <div class="hp-actions">
+          <button class="preset-edit-btn">Edit</button>
+          <button class="preset-delete-btn hp-revert-btn">Delete</button>
+        </div>
+      </div>
+    `).join('');
+
+    presetsListEl.querySelectorAll('.hp-card').forEach((card) => {
+      const id = card.dataset.id;
+      const preset = classPresets.find((p) => String(p.id) === id);
+      card.querySelector('.preset-edit-btn').addEventListener('click', () => openPresetModal(preset));
+      card.querySelector('.preset-delete-btn').addEventListener('click', () => deletePreset(id, preset.title));
+    });
+  }
+
+  function openPresetModal(preset) {
+    presetFormStatus.className = '';
+    presetFormStatus.textContent = '';
+    document.getElementById('preset-modal-title').textContent = preset ? 'Edit Preset' : 'Add Preset';
+    document.getElementById('preset-id').value = preset ? preset.id : '';
+    document.getElementById('preset-category').value = preset ? preset.category : '';
+    document.getElementById('preset-title').value = preset ? preset.title : '';
+    document.getElementById('preset-description').value = preset ? (preset.description || '') : '';
+    document.getElementById('preset-price').value = preset ? (preset.price_text || '') : '';
+    presetPhotoInput.value = '';
+    croppedPresetPhotoBlob = null;
+    presetPhotoCurrent.innerHTML = (preset && preset.has_photo)
+      ? `Current photo: <img src="${presetPhotoUrl(preset)}" alt="">`
+      : '';
+    presetModal.hidden = false;
+  }
+
+  document.getElementById('btn-new-preset').addEventListener('click', () => openPresetModal(null));
+  document.getElementById('btn-cancel-preset').addEventListener('click', () => { presetModal.hidden = true; });
+
+  presetForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('preset-id').value;
+    const category = document.getElementById('preset-category').value.trim();
+    const title = document.getElementById('preset-title').value.trim();
+    if (!category || !title) {
+      presetFormStatus.className = 'error';
+      presetFormStatus.textContent = 'Category and title are required.';
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('category', category);
+    formData.append('title', title);
+    formData.append('description', document.getElementById('preset-description').value);
+    formData.append('price_text', document.getElementById('preset-price').value);
+    if (croppedPresetPhotoBlob) formData.append('photo', croppedPresetPhotoBlob, 'photo.jpg');
+
+    const submitBtn = presetForm.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving…';
+    try {
+      const res = await fetch(id ? `/api/admin/class-presets/${id}` : '/api/admin/class-presets', {
+        method: id ? 'PUT' : 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Save failed');
+      presetModal.hidden = true;
+      loadClassPresets();
+    } catch (err) {
+      presetFormStatus.className = 'error';
+      presetFormStatus.textContent = err.message || 'Something went wrong saving this preset.';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Save Preset';
+    }
+  });
+
+  async function deletePreset(id, title) {
+    if (!confirm(`Delete the "${title}" preset? Classes already scheduled from it will NOT be removed.`)) return;
+    try {
+      const res = await fetch(`/api/admin/class-presets/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error();
+      loadClassPresets();
+    } catch (err) {
+      alert('Failed to delete this preset. Try again.');
+    }
+  }
+
+  // ---- classes: calendar ---------------------------------------------------
+
+  const calGridEl = document.getElementById('class-calendar');
+  const calMonthLabel = document.getElementById('cal-month-label');
+  const calendarMonth = new Date();
+  calendarMonth.setDate(1);
+  let calendarEvents = [];
+
+  function monthParam(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+  }
+
+  function formatDateLocal(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function eventPhotoUrl(ev) {
+    const v = ev.updated_at ? new Date(ev.updated_at).getTime() : '';
+    return `/class-photo/${ev.id}${v ? `?v=${v}` : ''}`;
+  }
+
+  async function loadClassEvents() {
+    try {
+      const res = await fetch(`/api/admin/class-events?month=${monthParam(calendarMonth)}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load');
+      calendarEvents = data.events;
+      renderCalendar();
+    } catch (err) {
+      calGridEl.innerHTML = '<div class="empty-state">Couldn\'t load the calendar. Try refreshing.</div>';
+    }
+  }
+
+  function renderCalendar() {
+    const year = calendarMonth.getFullYear();
+    const month = calendarMonth.getMonth();
+    calMonthLabel.textContent = calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+    const firstOfMonth = new Date(year, month, 1);
+    const startDow = firstOfMonth.getDay(); // 0 = Sunday
+    const gridStart = new Date(year, month, 1 - startDow);
+    const todayStr = formatDateLocal(new Date());
+
+    const eventsByDate = {};
+    calendarEvents.forEach((ev) => {
+      (eventsByDate[ev.event_date] = eventsByDate[ev.event_date] || []).push(ev);
+    });
+
+    const weekdayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+      .map((d) => `<div class="cal-weekday">${d}</div>`).join('');
+
+    let cellsHtml = '';
+    for (let i = 0; i < 42; i++) {
+      const cellDate = new Date(gridStart);
+      cellDate.setDate(gridStart.getDate() + i);
+      const dateStr = formatDateLocal(cellDate);
+      const isOutside = cellDate.getMonth() !== month;
+      const isToday = dateStr === todayStr;
+      const dayEvents = eventsByDate[dateStr] || [];
+
+      const chipsHtml = dayEvents.map((ev) => `
+        <button type="button" class="cal-event-chip ${!ev.active ? 'is-hidden' : ''}" data-id="${ev.id}">${escapeHtml(ev.title)}</button>
+      `).join('');
+
+      cellsHtml += `
+        <div class="cal-cell ${isOutside ? 'is-outside' : ''} ${isToday ? 'is-today' : ''}" data-date="${dateStr}">
+          <div class="cal-day-num">${cellDate.getDate()}</div>
+          ${chipsHtml}
+        </div>
+      `;
+    }
+
+    calGridEl.innerHTML = weekdayHeaders + cellsHtml;
+
+    calGridEl.querySelectorAll('.cal-cell').forEach((cell) => {
+      cell.addEventListener('click', (e) => {
+        if (e.target.closest('.cal-event-chip')) return; // handled separately below
+        openClassPicker(cell.dataset.date);
+      });
+    });
+
+    calGridEl.querySelectorAll('.cal-event-chip').forEach((chip) => {
+      chip.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const ev = calendarEvents.find((x) => String(x.id) === chip.dataset.id);
+        if (ev) openEventModal(ev);
+      });
+    });
+  }
+
+  document.getElementById('cal-prev').addEventListener('click', () => {
+    calendarMonth.setMonth(calendarMonth.getMonth() - 1);
+    loadClassEvents();
+  });
+  document.getElementById('cal-next').addEventListener('click', () => {
+    calendarMonth.setMonth(calendarMonth.getMonth() + 1);
+    loadClassEvents();
+  });
+
+  function loadClassesView() {
+    loadClassPresets();
+    loadClassEvents();
+  }
+
+  // ---- classes: "add a class" picker ---------------------------------------
+  // Shown when clicking "+ Add Class" or an empty calendar day — lets Becca
+  // jump straight to a prefilled event form from a preset, or build a
+  // one-off class from scratch.
+
+  const classPickerModal = document.getElementById('class-picker-modal');
+  const classPickerPresetsEl = document.getElementById('class-picker-presets');
+  let pickerDate = null;
+
+  function openClassPicker(dateStr) {
+    pickerDate = dateStr || formatDateLocal(new Date());
+    if (classPresets.length === 0) {
+      classPickerPresetsEl.innerHTML = '<p class="picker-empty">No presets yet — add one above, or build this class from scratch below.</p>';
+    } else {
+      classPickerPresetsEl.innerHTML = classPresets.map((p) => `
+        <button type="button" class="picker-preset-btn" data-id="${p.id}">
+          <span><span class="cat">${escapeHtml(p.category)}</span><br>${escapeHtml(p.title)}</span>
+          <span>&rarr;</span>
+        </button>
+      `).join('');
+      classPickerPresetsEl.querySelectorAll('.picker-preset-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const preset = classPresets.find((p) => String(p.id) === btn.dataset.id);
+          classPickerModal.hidden = true;
+          openEventModal(null, preset, pickerDate);
+        });
+      });
+    }
+    classPickerModal.hidden = false;
+  }
+
+  document.getElementById('btn-new-event').addEventListener('click', () => openClassPicker(null));
+  document.getElementById('btn-cancel-picker').addEventListener('click', () => { classPickerModal.hidden = true; });
+  document.getElementById('btn-picker-custom').addEventListener('click', () => {
+    classPickerModal.hidden = true;
+    openEventModal(null, null, pickerDate);
+  });
+
+  // ---- classes: event modal -------------------------------------------------
+
+  const eventModal = document.getElementById('event-modal');
+  const eventForm = document.getElementById('event-form');
+  const eventFormStatus = document.getElementById('event-form-status');
+  const eventPhotoInput = document.getElementById('event-photo');
+  const eventPhotoCurrent = document.getElementById('event-photo-current');
+  const btnDeleteEvent = document.getElementById('btn-delete-event');
+  let croppedEventPhotoBlob = null;
+
+  eventPhotoInput.addEventListener('change', () => {
+    const file = eventPhotoInput.files[0];
+    if (!file) return;
+    openImageCropper(file, { aspect: 4 / 3 }, (blob) => {
+      if (!blob) { eventPhotoInput.value = ''; return; }
+      croppedEventPhotoBlob = blob;
+      const url = URL.createObjectURL(blob);
+      eventPhotoCurrent.innerHTML = `New photo (cropped): <img src="${url}" alt="">`;
+    });
+  });
+
+  // `event` = existing event being edited (null for a new one). `preset` =
+  // the preset to prefill from when creating a new event (null for custom).
+  // `dateStr` = the date to prefill when creating a new event.
+  function openEventModal(event, preset, dateStr) {
+    eventFormStatus.className = '';
+    eventFormStatus.textContent = '';
+    croppedEventPhotoBlob = null;
+    eventPhotoInput.value = '';
+
+    document.getElementById('event-modal-title').textContent = event ? 'Edit Class' : 'Add Class';
+    document.getElementById('event-id').value = event ? event.id : '';
+    document.getElementById('event-preset-id').value = event ? (event.preset_id || '') : (preset ? preset.id : '');
+    document.getElementById('event-category').value = event ? event.category : (preset ? preset.category : '');
+    document.getElementById('event-title').value = event ? event.title : (preset ? preset.title : '');
+    document.getElementById('event-description').value = event ? (event.description || '') : (preset ? (preset.description || '') : '');
+    document.getElementById('event-price').value = event ? (event.price_text || '') : (preset ? (preset.price_text || '') : '');
+    document.getElementById('event-date').value = event ? event.event_date : (dateStr || '');
+    document.getElementById('event-start-time').value = event && event.start_time ? event.start_time.slice(0, 5) : '';
+    document.getElementById('event-end-time').value = event && event.end_time ? event.end_time.slice(0, 5) : '';
+    document.getElementById('event-active').checked = event ? event.active : true;
+
+    if (event && event.has_photo) {
+      eventPhotoCurrent.innerHTML = `Current photo: <img src="${eventPhotoUrl(event)}" alt="">`;
+    } else if (!event && preset && preset.has_photo) {
+      eventPhotoCurrent.innerHTML = `Using preset photo: <img src="${presetPhotoUrl(preset)}" alt="">`;
+    } else {
+      eventPhotoCurrent.innerHTML = '';
+    }
+
+    btnDeleteEvent.style.display = event ? '' : 'none';
+    eventModal.hidden = false;
+  }
+
+  document.getElementById('btn-cancel-event').addEventListener('click', () => { eventModal.hidden = true; });
+
+  eventForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('event-id').value;
+    const category = document.getElementById('event-category').value.trim();
+    const title = document.getElementById('event-title').value.trim();
+    const eventDate = document.getElementById('event-date').value;
+    if (!category || !title || !eventDate) {
+      eventFormStatus.className = 'error';
+      eventFormStatus.textContent = 'Category, title, and date are required.';
+      return;
+    }
+
+    const formData = new FormData();
+    const presetId = document.getElementById('event-preset-id').value;
+    if (presetId) formData.append('preset_id', presetId);
+    formData.append('category', category);
+    formData.append('title', title);
+    formData.append('description', document.getElementById('event-description').value);
+    formData.append('price_text', document.getElementById('event-price').value);
+    formData.append('event_date', eventDate);
+    formData.append('start_time', document.getElementById('event-start-time').value);
+    formData.append('end_time', document.getElementById('event-end-time').value);
+    formData.append('active', document.getElementById('event-active').checked ? 'true' : 'false');
+    if (croppedEventPhotoBlob) formData.append('photo', croppedEventPhotoBlob, 'photo.jpg');
+
+    const submitBtn = eventForm.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving…';
+    try {
+      const res = await fetch(id ? `/api/admin/class-events/${id}` : '/api/admin/class-events', {
+        method: id ? 'PUT' : 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Save failed');
+      eventModal.hidden = true;
+      loadClassEvents();
+    } catch (err) {
+      eventFormStatus.className = 'error';
+      eventFormStatus.textContent = err.message || 'Something went wrong saving this class.';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Save Class';
+    }
+  });
+
+  btnDeleteEvent.addEventListener('click', async () => {
+    const id = document.getElementById('event-id').value;
+    if (!id) return;
+    const title = document.getElementById('event-title').value;
+    if (!confirm(`Delete "${title}" from the calendar? This can't be undone.`)) return;
+    try {
+      const res = await fetch(`/api/admin/class-events/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error();
+      eventModal.hidden = true;
+      loadClassEvents();
+    } catch (err) {
+      alert('Failed to delete this class. Try again.');
     }
   });
 

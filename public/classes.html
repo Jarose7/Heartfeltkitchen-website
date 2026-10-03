@@ -8,13 +8,38 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
 <style>
-  .class-list{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line);border:1px solid var(--line);}
-  .class-list-row{background:var(--white);display:grid;grid-template-columns:140px 1fr auto;align-items:center;gap:24px;padding:26px 28px;}
-  .class-list-row .d{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--taupe);font-weight:700;font-family:'Montserrat',sans-serif;}
-  .class-list-row h3{font-family:'Montserrat',sans-serif;font-weight:700;font-size:17px;text-transform:none;margin-bottom:4px;}
-  .class-list-row p{font-size:13.5px;color:#6b5c4c;}
+  .cal-nav{display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:24px;}
+  .cal-nav h2{font-size:20px;text-transform:uppercase;letter-spacing:.02em;min-width:220px;text-align:center;}
+  .cal-nav-btn{all:unset;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--cocoa);border-radius:999px;font-size:16px;transition:background .15s ease,color .15s ease;}
+  .cal-nav-btn:hover{background:var(--cocoa);color:var(--cream);}
+
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:18px;}
+  .cal-weekday{background:var(--cream);padding:10px;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--taupe);font-family:'Montserrat',sans-serif;}
+  .cal-cell{background:var(--white);min-height:110px;padding:8px;display:flex;flex-direction:column;gap:5px;}
+  .cal-cell.is-outside{background:#faf7f1;}
+  .cal-cell .cal-day-num{font-size:12.5px;font-weight:700;color:var(--taupe);font-family:'Montserrat',sans-serif;}
+  .cal-cell.is-outside .cal-day-num{color:#ddd0bc;}
+  .cal-cell.is-today .cal-day-num{color:var(--cocoa);text-decoration:underline;}
+  .cal-event-chip{all:unset;cursor:pointer;font-size:11px;padding:4px 7px;background:var(--cream);color:var(--cocoa);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid var(--tan);transition:background .15s ease;}
+  .cal-event-chip:hover{background:var(--tan);}
+  .cal-empty-note{text-align:center;color:#6b5c4c;font-size:14px;padding:4px 0 0;}
+
+  .evt-modal-overlay{position:fixed;inset:0;background:rgba(20,12,7,0.55);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;}
+  .evt-modal-overlay[hidden]{display:none;}
+  .evt-modal-card{background:var(--white);max-width:460px;width:100%;max-height:88vh;overflow-y:auto;position:relative;}
+  .evt-modal-close{all:unset;cursor:pointer;position:absolute;top:14px;right:14px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:rgba(20,12,7,0.55);color:var(--white);font-size:18px;line-height:1;z-index:2;}
+  .evt-modal-close:hover{background:rgba(20,12,7,0.8);}
+  .evt-modal-photo{aspect-ratio:4/3;background-size:cover;background-position:center;background-color:var(--cream);}
+  .evt-modal-body{padding:26px 28px 30px;}
+  .evt-modal-body h3{font-size:22px;text-transform:uppercase;margin:8px 0 10px;}
+  .evt-modal-when{font-size:13.5px;color:#6b5c4c;margin-bottom:6px;font-weight:600;}
+  .evt-modal-price{font-size:14px;color:var(--cocoa);font-weight:700;margin-bottom:14px;}
+  .evt-modal-desc{font-size:14px;color:#6b5c4c;margin-bottom:22px;line-height:1.6;}
+
   @media (max-width:700px){
-    .class-list-row{grid-template-columns:1fr;gap:8px;}
+    .cal-cell{min-height:72px;font-size:11px;padding:5px;}
+    .cal-weekday{font-size:9px;padding:6px 2px;}
+    .cal-nav h2{min-width:150px;font-size:16px;}
   }
 </style>
 </head>
@@ -45,38 +70,39 @@
     <div class="wrap">
       <div class="eyebrow" style="margin-bottom:12px;">Hands-on, in the Canton kitchen</div>
       <h1>Classes at Heartfelt Kitchen</h1>
-      <p>Becca teaches culinary programs at the college level, and brings that same hands-on approach to classes here at Heartfelt Kitchen. A full calendar with dates and booking is coming soon.</p>
+      <p>Becca teaches culinary programs at the college level, and brings that same hands-on approach to classes here at Heartfelt Kitchen. Browse upcoming dates on the calendar below.</p>
     </div>
   </section>
 
   <section class="wrap">
     <div class="menu-note">
-      <p><strong>Booking is coming soon.</strong> Class dates, pricing, and online registration are still being built out. For now, submit an inquiry for a private class or to be notified when a class calendar goes live.</p>
+      <p>Click any class below for details and pricing. Don't see a date that works, or want a private class? <a href="/contact" style="text-decoration:underline;">Submit an inquiry</a> and Becca will follow up.</p>
     </div>
 
-    <div class="class-list">
-      <div class="class-list-row">
-        <div class="d">Baking</div>
-        <div><h3>Foundations of Pastry</h3><p>Hands-on, in the Canton kitchen</p></div>
-        <a href="/contact" class="pill pill-outline">Inquire</a>
-      </div>
-      <div class="class-list-row">
-        <div class="d">Bread</div>
-        <div><h3>Sourdough &amp; Lamination</h3><p>Hands-on, in the Canton kitchen</p></div>
-        <a href="/contact" class="pill pill-outline">Inquire</a>
-      </div>
-      <div class="class-list-row">
-        <div class="d">Chocolate</div>
-        <div><h3>Chocolate Work &amp; Decorating</h3><p>Hands-on, in the Canton kitchen</p></div>
-        <a href="/contact" class="pill pill-outline">Inquire</a>
-      </div>
-      <div class="class-list-row">
-        <div class="d">Global</div>
-        <div><h3>Pasta &amp; Sushi</h3><p>Hands-on, in the Canton kitchen</p></div>
-        <a href="/contact" class="pill pill-outline">Inquire</a>
+    <div class="cal-nav">
+      <button type="button" class="cal-nav-btn" id="cal-prev" aria-label="Previous month">&larr;</button>
+      <h2 id="cal-month-label"></h2>
+      <button type="button" class="cal-nav-btn" id="cal-next" aria-label="Next month">&rarr;</button>
+    </div>
+    <div class="cal-grid" id="class-calendar"></div>
+    <p id="cal-empty-note" class="cal-empty-note" hidden>No classes scheduled this month yet. Check back soon, or submit an inquiry for a private class.</p>
+  </section>
+
+  <!-- Class detail modal -->
+  <div id="event-detail-modal" class="evt-modal-overlay" hidden>
+    <div class="evt-modal-card">
+      <button type="button" class="evt-modal-close" id="evt-modal-close" aria-label="Close">&times;</button>
+      <div id="evt-modal-photo" class="evt-modal-photo" hidden></div>
+      <div class="evt-modal-body">
+        <div class="eyebrow" id="evt-modal-category"></div>
+        <h3 id="evt-modal-title"></h3>
+        <p class="evt-modal-when" id="evt-modal-when"></p>
+        <p class="evt-modal-price" id="evt-modal-price"></p>
+        <p class="evt-modal-desc" id="evt-modal-desc"></p>
+        <a href="/contact" class="pill pill-solid">Submit an Inquiry</a>
       </div>
     </div>
-  </section>
+  </div>
 
   <div class="banner">
     <div>
@@ -106,6 +132,164 @@
       </div>
     </div>
   </footer>
+
+  <script>
+    (function () {
+        const calGridEl = document.getElementById('class-calendar');
+        const calMonthLabel = document.getElementById('cal-month-label');
+        const calEmptyNote = document.getElementById('cal-empty-note');
+        const calendarMonth = new Date();
+        calendarMonth.setDate(1);
+        let calendarEvents = [];
+
+        function monthParam(date) {
+          return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        }
+        function formatDateLocal(d) {
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          return `${y}-${m}-${day}`;
+        }
+        function escapeHtml(str) {
+          if (str === null || str === undefined) return '';
+          return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function eventPhotoUrl(ev) {
+          const v = ev.updated_at ? new Date(ev.updated_at).getTime() : '';
+          return `/class-photo/${ev.id}${v ? `?v=${v}` : ''}`;
+        }
+        function formatTime12h(t) {
+          if (!t) return '';
+          const [h, m] = t.split(':').map(Number);
+          const period = h >= 12 ? 'PM' : 'AM';
+          const h12 = h % 12 === 0 ? 12 : h % 12;
+          return m ? `${h12}:${String(m).padStart(2, '0')} ${period}` : `${h12} ${period}`;
+        }
+        function formatEventDate(dateStr) {
+          // dateStr is a plain 'YYYY-MM-DD' string — build the Date from
+          // local-time parts so it never shifts a day from UTC parsing of
+          // a bare date string (new Date('2026-10-15') parses as UTC
+          // midnight, which prints as Oct 14 in timezones west of UTC).
+          const [y, m, d] = dateStr.split('-').map(Number);
+          return new Date(y, m - 1, d).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        }
+
+        async function loadClassEvents() {
+          try {
+            const res = await fetch(`/api/class-events?month=${monthParam(calendarMonth)}`);
+            const data = await res.json();
+            if (!res.ok) throw new Error();
+            calendarEvents = data.events;
+            renderCalendar();
+          } catch (err) {
+            calGridEl.innerHTML = '<p style="grid-column:1/-1;padding:30px;text-align:center;color:#6b5c4c;">Couldn\'t load the class calendar. Please try refreshing.</p>';
+          }
+        }
+
+        function renderCalendar() {
+          const year = calendarMonth.getFullYear();
+          const month = calendarMonth.getMonth();
+          calMonthLabel.textContent = calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+          const firstOfMonth = new Date(year, month, 1);
+          const startDow = firstOfMonth.getDay();
+          const gridStart = new Date(year, month, 1 - startDow);
+          const todayStr = formatDateLocal(new Date());
+
+          const eventsByDate = {};
+          calendarEvents.forEach((ev) => {
+            (eventsByDate[ev.event_date] = eventsByDate[ev.event_date] || []).push(ev);
+          });
+
+          const weekdayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+            .map((d) => `<div class="cal-weekday">${d}</div>`).join('');
+
+          let cellsHtml = '';
+          let hasAnyThisMonth = false;
+          for (let i = 0; i < 42; i++) {
+            const cellDate = new Date(gridStart);
+            cellDate.setDate(gridStart.getDate() + i);
+            const dateStr = formatDateLocal(cellDate);
+            const isOutside = cellDate.getMonth() !== month;
+            const isToday = dateStr === todayStr;
+            const dayEvents = eventsByDate[dateStr] || [];
+            if (!isOutside && dayEvents.length) hasAnyThisMonth = true;
+
+            const chipsHtml = dayEvents.map((ev) => `
+              <button type="button" class="cal-event-chip" data-id="${ev.id}">${escapeHtml(ev.title)}</button>
+            `).join('');
+
+            cellsHtml += `
+              <div class="cal-cell ${isOutside ? 'is-outside' : ''} ${isToday ? 'is-today' : ''}">
+                <div class="cal-day-num">${cellDate.getDate()}</div>
+                ${chipsHtml}
+              </div>
+            `;
+          }
+
+          calGridEl.innerHTML = weekdayHeaders + cellsHtml;
+          calEmptyNote.hidden = hasAnyThisMonth;
+
+          calGridEl.querySelectorAll('.cal-event-chip').forEach((chip) => {
+            chip.addEventListener('click', () => {
+              const ev = calendarEvents.find((x) => String(x.id) === chip.dataset.id);
+              if (ev) openEventDetail(ev);
+            });
+          });
+        }
+
+        document.getElementById('cal-prev').addEventListener('click', () => {
+          calendarMonth.setMonth(calendarMonth.getMonth() - 1);
+          loadClassEvents();
+        });
+        document.getElementById('cal-next').addEventListener('click', () => {
+          calendarMonth.setMonth(calendarMonth.getMonth() + 1);
+          loadClassEvents();
+        });
+
+        // ---- detail modal ----
+        const detailModal = document.getElementById('event-detail-modal');
+        const detailPhoto = document.getElementById('evt-modal-photo');
+        const detailCategory = document.getElementById('evt-modal-category');
+        const detailTitle = document.getElementById('evt-modal-title');
+        const detailWhen = document.getElementById('evt-modal-when');
+        const detailPrice = document.getElementById('evt-modal-price');
+        const detailDesc = document.getElementById('evt-modal-desc');
+
+        function openEventDetail(ev) {
+          detailCategory.textContent = ev.category;
+          detailTitle.textContent = ev.title;
+
+          let when = formatEventDate(ev.event_date);
+          const start = formatTime12h(ev.start_time);
+          const end = formatTime12h(ev.end_time);
+          if (start && end) when += ` · ${start} to ${end}`;
+          else if (start) when += ` · ${start}`;
+          detailWhen.textContent = when;
+
+          detailPrice.textContent = ev.price_text || '';
+          detailPrice.style.display = ev.price_text ? '' : 'none';
+          detailDesc.textContent = ev.description || '';
+          detailDesc.style.display = ev.description ? '' : 'none';
+
+          if (ev.has_photo) {
+            detailPhoto.style.backgroundImage = `url('${eventPhotoUrl(ev)}')`;
+            detailPhoto.hidden = false;
+          } else {
+            detailPhoto.hidden = true;
+          }
+          detailModal.hidden = false;
+        }
+
+        document.getElementById('evt-modal-close').addEventListener('click', () => { detailModal.hidden = true; });
+        detailModal.addEventListener('click', (e) => {
+          if (e.target === detailModal) detailModal.hidden = true;
+        });
+
+        loadClassEvents();
+      })();
+  </script>
 
 </body>
 </html>

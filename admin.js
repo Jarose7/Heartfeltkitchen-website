@@ -36,6 +36,29 @@ const upload = multer({
   },
 });
 
+// Turns a "YYYY-MM" month string into a [start, end] date range (as
+// "YYYY-MM-DD" strings) padded a week on either side — enough to cover
+// every cell a 6-row calendar grid could ever show for that month,
+// including leading/trailing days that belong to the previous/next month.
+// Falls back to the current month if the input is missing or malformed,
+// so a bad query param can't produce an error or an empty-looking calendar.
+function monthRangeWithPadding(monthStr) {
+  const match = /^(\d{4})-(\d{2})$/.exec(monthStr || "");
+  const now = new Date();
+  const year = match ? parseInt(match[1], 10) : now.getFullYear();
+  const month = match ? parseInt(match[2], 10) - 1 : now.getMonth(); // JS months are 0-indexed
+
+  const firstOfMonth = new Date(Date.UTC(year, month, 1));
+  const lastOfMonth = new Date(Date.UTC(year, month + 1, 0));
+  const start = new Date(firstOfMonth);
+  start.setUTCDate(start.getUTCDate() - 7);
+  const end = new Date(lastOfMonth);
+  end.setUTCDate(end.getUTCDate() + 7);
+
+  const toISODate = (d) => d.toISOString().slice(0, 10);
+  return { start: toISODate(start), end: toISODate(end) };
+}
+
 async function checkAdminCredentials(pool, username, password) {
   if (!username || !password) return false;
 
@@ -108,6 +131,69 @@ function buildAdminRouter(pool) {
     } catch (err) {
       console.error("Failed to load homepage photo:", err);
       res.status(500).end();
+    }
+  });
+
+  // Same pattern again, for class calendar photos (see schema-classes.sql).
+  // Two separate routes since presets and events are two separate tables —
+  // an event's photo is its own copy (possibly inherited from a preset at
+  // creation time, possibly a custom upload), while a preset's photo is
+  // only ever seen in the admin panel's preset picker.
+  router.get("/class-photo/:id", async (req, res) => {
+    try {
+      const result = await pool.query(
+        "SELECT photo, photo_mime FROM class_events WHERE id=$1 AND photo IS NOT NULL",
+        [req.params.id]
+      );
+      if (result.rows.length === 0) return res.status(404).end();
+      const { photo, photo_mime } = result.rows[0];
+      res.set("Content-Type", photo_mime || "image/jpeg");
+      res.set("Cache-Control", "public, max-age=3600");
+      res.send(photo);
+    } catch (err) {
+      console.error("Failed to load class event photo:", err);
+      res.status(500).end();
+    }
+  });
+
+  router.get("/class-preset-photo/:id", async (req, res) => {
+    try {
+      const result = await pool.query(
+        "SELECT photo, photo_mime FROM class_presets WHERE id=$1 AND photo IS NOT NULL",
+        [req.params.id]
+      );
+      if (result.rows.length === 0) return res.status(404).end();
+      const { photo, photo_mime } = result.rows[0];
+      res.set("Content-Type", photo_mime || "image/jpeg");
+      res.set("Cache-Control", "public, max-age=3600");
+      res.send(photo);
+    } catch (err) {
+      console.error("Failed to load class preset photo:", err);
+      res.status(500).end();
+    }
+  });
+
+  // Public, unauthenticated: powers the real calendar on /classes. Returns
+  // only active events, and only the fields a visitor should see (no
+  // internal flags). `month` is a "YYYY-MM" string for the month currently
+  // shown; the range is padded a week on each side so the calendar grid's
+  // leading/trailing days (from the previous/next month, shown grayed out)
+  // can show their events too without a second request.
+  router.get("/api/class-events", async (req, res) => {
+    try {
+      const { start, end } = monthRangeWithPadding(req.query.month);
+      const result = await pool.query(
+        `SELECT id, category, title, description, price_text, to_char(event_date, 'YYYY-MM-DD') AS event_date, start_time, end_time, updated_at,
+                (photo IS NOT NULL) AS has_photo
+         FROM class_events
+         WHERE active = true AND event_date BETWEEN $1 AND $2
+         ORDER BY event_date, start_time NULLS LAST, title`,
+        [start, end]
+      );
+      res.json({ events: result.rows });
+    } catch (err) {
+      console.error("Failed to load public class events:", err);
+      res.status(500).json({ error: "Failed to load classes." });
     }
   });
 
@@ -419,6 +505,203 @@ function buildAdminRouter(pool) {
     } catch (err) {
       console.error("Failed to revert homepage photo:", err);
       res.status(500).json({ error: "Failed to revert homepage photo." });
+    }
+  });
+
+  // ---- class presets API -------------------------------------------------
+  // Reusable "class types" (see schema-classes.sql) so scheduling another
+  // date for a class Becca already runs doesn't mean retyping its title,
+  // description, price, and photo every time.
+
+  router.get("/api/admin/class-presets", requireAdminApi, async (req, res) => {
+    try {
+      const result = await pool.query(
+        `SELECT id, category, title, description, price_text, sort_order,
+                (photo IS NOT NULL) AS has_photo, updated_at
+         FROM class_presets ORDER BY sort_order, title`
+      );
+      res.json({ presets: result.rows });
+    } catch (err) {
+      console.error("Failed to list class presets:", err);
+      res.status(500).json({ error: "Failed to load class presets." });
+    }
+  });
+
+  router.post("/api/admin/class-presets", requireAdminApi, upload.single("photo"), async (req, res) => {
+    const { category, title, description, price_text, sort_order } = req.body;
+    if (!category || !title) {
+      return res.status(400).json({ error: "Category and title are required." });
+    }
+    try {
+      const result = await pool.query(
+        `INSERT INTO class_presets (category, title, description, price_text, photo, photo_mime, sort_order, updated_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7, now())
+         RETURNING id`,
+        [
+          category,
+          title,
+          description || null,
+          price_text || null,
+          req.file ? req.file.buffer : null,
+          req.file ? req.file.mimetype : null,
+          sort_order ? parseInt(sort_order, 10) : 0,
+        ]
+      );
+      res.status(201).json({ success: true, id: result.rows[0].id });
+    } catch (err) {
+      if (err.code === "23505") {
+        return res.status(400).json({ error: "A preset with that title already exists." });
+      }
+      console.error("Failed to create class preset:", err);
+      res.status(500).json({ error: "Failed to save class preset." });
+    }
+  });
+
+  router.put("/api/admin/class-presets/:id", requireAdminApi, upload.single("photo"), async (req, res) => {
+    const { id } = req.params;
+    const { category, title, description, price_text, sort_order } = req.body;
+    if (!category || !title) {
+      return res.status(400).json({ error: "Category and title are required." });
+    }
+    try {
+      if (req.file) {
+        await pool.query(
+          `UPDATE class_presets SET category=$1, title=$2, description=$3, price_text=$4,
+             photo=$5, photo_mime=$6, sort_order=$7, updated_at=now()
+           WHERE id=$8`,
+          [category, title, description || null, price_text || null, req.file.buffer, req.file.mimetype, sort_order ? parseInt(sort_order, 10) : 0, id]
+        );
+      } else {
+        await pool.query(
+          `UPDATE class_presets SET category=$1, title=$2, description=$3, price_text=$4,
+             sort_order=$5, updated_at=now()
+           WHERE id=$6`,
+          [category, title, description || null, price_text || null, sort_order ? parseInt(sort_order, 10) : 0, id]
+        );
+      }
+      res.json({ success: true });
+    } catch (err) {
+      if (err.code === "23505") {
+        return res.status(400).json({ error: "A preset with that title already exists." });
+      }
+      console.error("Failed to update class preset:", err);
+      res.status(500).json({ error: "Failed to update class preset." });
+    }
+  });
+
+  // Deleting a preset never deletes events created from it — preset_id on
+  // those rows just goes to NULL (see the ON DELETE SET NULL in
+  // schema-classes.sql) since each event already carries its own copy of
+  // everything. Already-scheduled classes keep showing on the calendar
+  // exactly as they did before.
+  router.delete("/api/admin/class-presets/:id", requireAdminApi, async (req, res) => {
+    try {
+      await pool.query("DELETE FROM class_presets WHERE id=$1", [req.params.id]);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Failed to delete class preset:", err);
+      res.status(500).json({ error: "Failed to delete class preset." });
+    }
+  });
+
+  // ---- class calendar events API -----------------------------------------
+  // Unlike the public /api/class-events above, this returns EVERY event in
+  // range regardless of `active`, so the admin calendar can show (and let
+  // Becca re-enable) a hidden event instead of it just disappearing.
+
+  router.get("/api/admin/class-events", requireAdminApi, async (req, res) => {
+    try {
+      const { start, end } = monthRangeWithPadding(req.query.month);
+      const result = await pool.query(
+        `SELECT id, preset_id, category, title, description, price_text, to_char(event_date, 'YYYY-MM-DD') AS event_date, start_time, end_time,
+                active, (photo IS NOT NULL) AS has_photo, updated_at
+         FROM class_events
+         WHERE event_date BETWEEN $1 AND $2
+         ORDER BY event_date, start_time NULLS LAST, title`,
+        [start, end]
+      );
+      res.json({ events: result.rows });
+    } catch (err) {
+      console.error("Failed to list class events:", err);
+      res.status(500).json({ error: "Failed to load class events." });
+    }
+  });
+
+  router.post("/api/admin/class-events", requireAdminApi, upload.single("photo"), async (req, res) => {
+    const { preset_id, category, title, description, price_text, event_date, start_time, end_time, active } = req.body;
+    if (!category || !title || !event_date) {
+      return res.status(400).json({ error: "Category, title, and date are required." });
+    }
+    try {
+      const result = await pool.query(
+        `INSERT INTO class_events
+           (preset_id, category, title, description, price_text, photo, photo_mime, event_date, start_time, end_time, active, updated_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11, now())
+         RETURNING id`,
+        [
+          preset_id || null,
+          category,
+          title,
+          description || null,
+          price_text || null,
+          req.file ? req.file.buffer : null,
+          req.file ? req.file.mimetype : null,
+          event_date,
+          start_time || null,
+          end_time || null,
+          active === "false" ? false : true,
+        ]
+      );
+      res.status(201).json({ success: true, id: result.rows[0].id });
+    } catch (err) {
+      console.error("Failed to create class event:", err);
+      res.status(500).json({ error: "Failed to save class event." });
+    }
+  });
+
+  router.put("/api/admin/class-events/:id", requireAdminApi, upload.single("photo"), async (req, res) => {
+    const { id } = req.params;
+    const { preset_id, category, title, description, price_text, event_date, start_time, end_time, active } = req.body;
+    if (!category || !title || !event_date) {
+      return res.status(400).json({ error: "Category, title, and date are required." });
+    }
+    try {
+      if (req.file) {
+        await pool.query(
+          `UPDATE class_events SET preset_id=$1, category=$2, title=$3, description=$4, price_text=$5,
+             photo=$6, photo_mime=$7, event_date=$8, start_time=$9, end_time=$10, active=$11, updated_at=now()
+           WHERE id=$12`,
+          [
+            preset_id || null, category, title, description || null, price_text || null,
+            req.file.buffer, req.file.mimetype, event_date, start_time || null, end_time || null,
+            active === "false" ? false : true, id,
+          ]
+        );
+      } else {
+        await pool.query(
+          `UPDATE class_events SET preset_id=$1, category=$2, title=$3, description=$4, price_text=$5,
+             event_date=$6, start_time=$7, end_time=$8, active=$9, updated_at=now()
+           WHERE id=$10`,
+          [
+            preset_id || null, category, title, description || null, price_text || null,
+            event_date, start_time || null, end_time || null, active === "false" ? false : true, id,
+          ]
+        );
+      }
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Failed to update class event:", err);
+      res.status(500).json({ error: "Failed to update class event." });
+    }
+  });
+
+  router.delete("/api/admin/class-events/:id", requireAdminApi, async (req, res) => {
+    try {
+      await pool.query("DELETE FROM class_events WHERE id=$1", [req.params.id]);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Failed to delete class event:", err);
+      res.status(500).json({ error: "Failed to delete class event." });
     }
   });
 

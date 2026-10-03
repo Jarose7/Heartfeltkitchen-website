@@ -174,6 +174,24 @@ into Render's database Shell tab:
    running it twice duplicates every item. After this, manage menu items
    going forward through `/admin`, not by re-running the SQL file.
 
+## 10. Classes calendar (one-time)
+
+Run `schema-classes.sql` once against the live Render Postgres database, the
+same way as `schema-admin.sql` — via `render psql <db-id>` then
+`\i schema-classes.sql`, or paste it into Render's database Shell tab. This
+adds the real, admin-maintained class calendar shown on `/classes`:
+
+- `class_presets` — reusable class types (seeded with the 4 already on the
+  old static page: Foundations of Pastry, Sourdough & Lamination, Chocolate
+  Work & Decorating, Pasta & Sushi). Manage these from `/admin` under
+  Classes > Presets.
+- `class_events` — the actual scheduled dates visitors see. Add one from
+  `/admin` > Classes > + Add Class, either starting from a preset (just set
+  a date/time) or building a one-off class from scratch.
+
+Safe to run even if `schema-admin.sql` was already applied — this is a
+separate, independent set of tables.
+
 ## Local development (optional)
 
 ```
