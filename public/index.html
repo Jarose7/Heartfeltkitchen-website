@@ -159,10 +159,11 @@
 
   <div class="nl-bar">
     <h3>Get seasonal menus &amp; class dates</h3>
-    <form onsubmit="return false;">
-      <input type="email" placeholder="name@email.com" disabled title="Newsletter sign-up coming soon">
-      <button disabled>Subscribe</button>
+    <form id="newsletter-form">
+      <input type="email" id="newsletter-email" name="email" placeholder="name@email.com" required>
+      <button type="submit">Subscribe</button>
     </form>
+    <div id="newsletter-status"></div>
   </div>
 
   <footer>
@@ -185,6 +186,50 @@
       </div>
     </div>
   </footer>
+
+  <script>
+    const nlForm = document.getElementById('newsletter-form');
+    const nlStatus = document.getElementById('newsletter-status');
+    const nlButton = nlForm.querySelector('button[type="submit"]');
+    const nlButtonDefaultText = nlButton.textContent;
+
+    nlForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      nlStatus.className = '';
+      nlStatus.textContent = '';
+
+      const email = document.getElementById('newsletter-email').value.trim();
+
+      nlButton.disabled = true;
+      nlButton.classList.add('loading');
+      nlButton.textContent = 'Subscribing…';
+
+      try {
+        const res = await fetch('/api/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const result = await res.json();
+
+        if (res.ok) {
+          nlStatus.className = 'success';
+          nlStatus.textContent = "You're subscribed! Keep an eye on your inbox.";
+          nlForm.reset();
+        } else {
+          nlStatus.className = 'error';
+          nlStatus.textContent = result.error || 'Something went wrong. Please try again.';
+        }
+      } catch (err) {
+        nlStatus.className = 'error';
+        nlStatus.textContent = 'Something went wrong. Please try again.';
+      } finally {
+        nlButton.disabled = false;
+        nlButton.classList.remove('loading');
+        nlButton.textContent = nlButtonDefaultText;
+      }
+    });
+  </script>
 
 </body>
 </html>

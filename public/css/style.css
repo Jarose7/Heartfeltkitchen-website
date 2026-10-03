@@ -131,8 +131,12 @@ section{padding:88px 0;}
 }
 .nl-bar h3{font-family:'Montserrat',sans-serif;font-weight:700;font-size:19px;text-transform:none;}
 .nl-bar form{display:flex;gap:10px;}
-.nl-bar input{width:260px;padding:13px 16px;border:1.5px solid var(--cocoa);border-radius:999px;font-family:'Manrope',sans-serif;background:var(--white);}
-.nl-bar button{padding:13px 26px;border-radius:999px;background:var(--cocoa);color:var(--cream);border:1.5px solid var(--cocoa);font-size:13px;letter-spacing:.05em;text-transform:uppercase;font-weight:700;font-family:'Montserrat',sans-serif;cursor:pointer;}
+.nl-bar input{width:260px;padding:13px 16px;border:1.5px solid var(--cocoa);border-radius:999px;font-family:'Manrope',sans-serif;background:var(--white);transition:border-color .2s ease;}
+.nl-bar button{padding:13px 26px;border-radius:999px;background:var(--cocoa);color:var(--cream);border:1.5px solid var(--cocoa);font-size:13px;letter-spacing:.05em;text-transform:uppercase;font-weight:700;font-family:'Montserrat',sans-serif;cursor:pointer;position:relative;overflow:hidden;}
+.nl-bar button.loading{pointer-events:none;opacity:.92;}
+#newsletter-status{flex-basis:100%;font-size:13px;display:none;}
+#newsletter-status.success{display:block;color:#3a5a2c;}
+#newsletter-status.error{display:block;color:#7a2b1f;}
 
 /* Inquiry / contact form */
 .form-wrap{max-width:720px;}
@@ -148,7 +152,7 @@ section{padding:88px 0;}
 .form-field input:focus,.form-field select:focus,.form-field textarea:focus{outline:none;border-color:var(--cocoa);}
 .form-submit{margin-top:8px;position:relative;overflow:hidden;}
 .form-submit.loading{pointer-events:none;opacity:.92;}
-.form-submit.loading::after{
+.form-submit.loading::after,.nl-bar button.loading::after{
   content:"";position:absolute;top:0;left:-60%;height:100%;width:60%;
   background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);
   animation:btn-shimmer 1.1s ease-in-out infinite;
@@ -197,5 +201,5 @@ footer .wordmark{color:var(--cream);}
 
 @media (prefers-reduced-motion:reduce){
   .nl-bar{animation:none;}
-  .form-submit.loading::after{animation:none;display:none;}
+  .form-submit.loading::after,.nl-bar button.loading::after{animation:none;display:none;}
 }

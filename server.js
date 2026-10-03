@@ -9,7 +9,7 @@ const path = require("path");
 const pool = require("./db");
 const buildAdminRouter = require("./admin");
 const { renderTemplate, getSiteContent, getMenuItems, menuItemCardHtml, textBlockToHtml, getHomepagePhotosCss } = require("./lib/render");
-const { sendInquiryToFlodesk } = require("./lib/flodesk");
+const { sendInquiryToFlodesk, addNewsletterSubscriber } = require("./lib/flodesk");
 const { sendInquiryNotification } = require("./lib/email");
 
 const app = express();
@@ -240,6 +240,28 @@ app.post("/api/inquiries", async (req, res) => {
   } catch (err) {
     console.error("Failed to save inquiry:", err);
     res.status(500).json({ error: "Something went wrong saving your inquiry. Please try again." });
+  }
+});
+
+// Homepage newsletter sign-up bar. Pushes straight to Flodesk (see
+// lib/flodesk.js) — there's no local table backing this, since Flodesk
+// itself is the subscriber list for the newsletter. If Flodesk isn't
+// configured or the call fails, we tell the visitor rather than pretend
+// it worked, since there's no database fallback to fall back on here.
+app.post("/api/newsletter", async (req, res) => {
+  const { email } = req.body;
+  const validEmail = typeof email === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
+  if (!validEmail) {
+    return res.status(400).json({ error: "Please enter a valid email address." });
+  }
+
+  try {
+    await addNewsletterSubscriber(email.trim());
+    res.status(201).json({ success: true });
+  } catch (err) {
+    console.error("Failed to add newsletter subscriber:", err.message);
+    res.status(500).json({ error: "Something went wrong signing you up. Please try again, or email heartfeltkitchen@gmail.com directly." });
   }
 });
 
