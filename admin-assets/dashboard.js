@@ -672,9 +672,27 @@
   const btnDeleteEvent = document.getElementById('btn-delete-event');
   const btnDuplicateEvent = document.getElementById('btn-duplicate-event');
   const eventPresetSummary = document.getElementById('event-preset-summary');
-  const eventFullFields = document.getElementById('event-full-fields');
-  const btnToggleFullFields = document.getElementById('btn-toggle-full-fields');
+  const eventScheduleSummary = document.getElementById('event-schedule-summary');
+  const stepDetailsEl = document.getElementById('event-step-details');
+  const stepScheduleEl = document.getElementById('event-step-schedule');
+  const modalStepsEl = document.getElementById('event-modal-steps');
+  const btnBackStep = document.getElementById('btn-back-step');
+  const btnNextStep = document.getElementById('btn-next-step');
+  const btnSaveEvent = document.getElementById('btn-save-event');
   let croppedEventPhotoBlob = null;
+
+  // `eventMode` drives which steps exist and how Back/Next/Save behave:
+  //   'preset' — scheduling a known class. Starts on the Schedule step
+  //              (date/time only) since everything else is already known;
+  //              "Edit Full Details" is an optional detour, not a required
+  //              step, so Save is reachable from either step.
+  //   'custom' — building a one-off class. A strict 2-step flow (Details,
+  //              then Schedule) since there's no prefill to skip past.
+  //   'edit'   — changing an existing calendar entry. Both steps shown at
+  //              once, no wizard — you're reviewing something that already
+  //              exists, not stepping through creating it.
+  let eventMode = 'custom';
+  let eventStep = 'details';
 
   eventPhotoInput.addEventListener('change', () => {
     const file = eventPhotoInput.files[0];
@@ -687,23 +705,90 @@
     });
   });
 
+  function renderEventStep() {
+    if (eventMode === 'edit') {
+      stepDetailsEl.hidden = false;
+      stepScheduleEl.hidden = false;
+      modalStepsEl.hidden = true;
+      btnBackStep.hidden = true;
+      btnNextStep.hidden = true;
+      btnSaveEvent.hidden = false;
+      return;
+    }
+
+    stepDetailsEl.hidden = eventStep !== 'details';
+    stepScheduleEl.hidden = eventStep !== 'schedule';
+
+    if (eventMode === 'preset') {
+      // Not a strict linear count (Details is an optional detour from
+      // Schedule, not step "2 of 2"), so no step dots here — just a
+      // contextual Back/Next pair.
+      modalStepsEl.hidden = true;
+      btnSaveEvent.hidden = false;
+      if (eventStep === 'schedule') {
+        btnBackStep.hidden = true;
+        btnNextStep.hidden = false;
+        btnNextStep.textContent = 'Edit Full Details →';
+      } else {
+        btnNextStep.hidden = true;
+        btnBackStep.hidden = false;
+        btnBackStep.textContent = '← Back to Schedule';
+      }
+      return;
+    }
+
+    // eventMode === 'custom' — real 2-step wizard, dots reflect progress.
+    modalStepsEl.hidden = false;
+    modalStepsEl.querySelectorAll('.modal-step-dot').forEach((dot) => {
+      dot.classList.toggle('is-active', dot.dataset.step === eventStep);
+      dot.classList.toggle('is-done', dot.dataset.step === 'details' && eventStep === 'schedule');
+    });
+    if (eventStep === 'details') {
+      btnBackStep.hidden = true;
+      btnNextStep.hidden = false;
+      btnNextStep.textContent = 'Next: Schedule →';
+      btnSaveEvent.hidden = true;
+    } else {
+      btnNextStep.hidden = true;
+      btnBackStep.hidden = false;
+      btnBackStep.textContent = '← Back';
+      btnSaveEvent.hidden = false;
+    }
+  }
+
+  btnNextStep.addEventListener('click', () => {
+    if (eventMode === 'preset') {
+      eventStep = 'details';
+    } else {
+      const category = document.getElementById('event-category').value.trim();
+      const title = document.getElementById('event-title').value.trim();
+      if (!category || !title) {
+        eventFormStatus.className = 'error';
+        eventFormStatus.textContent = 'Category and title are required.';
+        return;
+      }
+      eventFormStatus.className = '';
+      eventFormStatus.textContent = '';
+      eventStep = 'schedule';
+    }
+    renderEventStep();
+  });
+
+  btnBackStep.addEventListener('click', () => {
+    eventStep = eventMode === 'preset' ? 'schedule' : 'details';
+    renderEventStep();
+  });
+
   // `event` = existing event being edited (null for a new one). `preset` =
   // the preset to prefill from when creating a new event (null for custom).
   // `dateStr` = the date to prefill when creating a new event.
-  //
-  // Scheduling FROM a preset is the common case, so that path starts
-  // collapsed to just date/time behind a read-only preset summary card —
-  // Becca doesn't have to look at (or accidentally edit) the title/
-  // description/price/photo every single time. Editing an existing event,
-  // or building a custom one from scratch, always shows every field, since
-  // there's no "known good" prefill to hide behind in either case.
   function openEventModal(event, preset, dateStr) {
     eventFormStatus.className = '';
     eventFormStatus.textContent = '';
     croppedEventPhotoBlob = null;
     eventPhotoInput.value = '';
 
-    document.getElementById('event-modal-title').textContent = event ? 'Edit Class' : 'Add Class';
+    document.getElementById('event-modal-title').textContent = event ? 'Edit Class' : (preset ? 'Schedule Class' : 'Add Class');
     document.getElementById('event-id').value = event ? event.id : '';
     document.getElementById('event-preset-id').value = event ? (event.preset_id || '') : (preset ? preset.id : '');
     document.getElementById('event-category').value = event ? event.category : (preset ? preset.category : '');
@@ -723,29 +808,36 @@
       eventPhotoCurrent.innerHTML = '';
     }
 
-    const startFromPresetCollapsed = !event && preset;
-    if (startFromPresetCollapsed) {
+    if (!event && preset) {
+      eventMode = 'preset';
+      eventStep = 'schedule';
       document.getElementById('event-preset-summary-cat').textContent = preset.category;
       document.getElementById('event-preset-summary-title').textContent = preset.title;
       document.getElementById('event-preset-summary-price').textContent = preset.price_text || '';
-      const thumb = document.getElementById('event-preset-summary-thumb');
-      thumb.style.backgroundImage = preset.has_photo ? `url('${presetPhotoUrl(preset)}')` : '';
+      document.getElementById('event-preset-summary-thumb').style.backgroundImage = preset.has_photo ? `url('${presetPhotoUrl(preset)}')` : '';
       eventPresetSummary.hidden = false;
-      eventFullFields.hidden = true;
-    } else {
+
+      document.getElementById('event-schedule-summary-cat').textContent = preset.category;
+      document.getElementById('event-schedule-summary-title').textContent = preset.title;
+      document.getElementById('event-schedule-summary-thumb').style.backgroundImage = preset.has_photo ? `url('${presetPhotoUrl(preset)}')` : '';
+      eventScheduleSummary.hidden = false;
+    } else if (!event) {
+      eventMode = 'custom';
+      eventStep = 'details';
       eventPresetSummary.hidden = true;
-      eventFullFields.hidden = false;
+      eventScheduleSummary.hidden = true;
+    } else {
+      eventMode = 'edit';
+      eventPresetSummary.hidden = true;
+      eventScheduleSummary.hidden = true;
     }
 
-    btnDeleteEvent.style.display = event ? '' : 'none';
+    btnDeleteEvent.hidden = !event;
     btnDuplicateEvent.hidden = !event;
+
+    renderEventStep();
     eventModal.hidden = false;
   }
-
-  btnToggleFullFields.addEventListener('click', () => {
-    eventPresetSummary.hidden = true;
-    eventFullFields.hidden = false;
-  });
 
   document.getElementById('btn-cancel-event').addEventListener('click', () => { eventModal.hidden = true; });
 
@@ -787,6 +879,12 @@
     document.getElementById('event-price').value = fields.price;
     document.getElementById('event-start-time').value = fields.startTime;
     document.getElementById('event-end-time').value = fields.endTime;
+
+    // Everything duplicated over is already valid, so skip straight to
+    // the Schedule step — only the date usually needs changing. Back is
+    // still there if the title/description need a tweak too.
+    eventStep = 'schedule';
+    renderEventStep();
 
     if (hadPhoto && originalId) {
       try {

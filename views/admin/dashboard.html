@@ -205,48 +205,70 @@
     </div>
   </div>
 
-  <!-- Class event edit modal -->
+  <!-- Class event edit modal — a 2-step wizard when creating (Schedule +
+       Details, order depends on whether it's starting from a preset), and
+       a single combined view when editing an existing class. -->
   <div id="event-modal" class="modal-overlay" hidden>
-    <div class="modal-card">
+    <div class="modal-card event-modal-card">
+      <div id="event-modal-steps" class="modal-steps" hidden>
+        <span class="modal-step-dot" data-step="details">1</span>
+        <span class="modal-step-line"></span>
+        <span class="modal-step-dot" data-step="schedule">2</span>
+      </div>
       <h2 id="event-modal-title">Add Class</h2>
       <form id="event-form">
         <input type="hidden" id="event-id">
         <input type="hidden" id="event-preset-id">
 
-        <div id="event-preset-summary" class="preset-summary" hidden>
-          <div id="event-preset-summary-thumb" class="preset-summary-thumb"></div>
-          <div class="preset-summary-info">
-            <span class="preset-summary-cat" id="event-preset-summary-cat"></span>
-            <div class="preset-summary-title" id="event-preset-summary-title"></div>
-            <div class="preset-summary-price" id="event-preset-summary-price"></div>
+        <!-- DETAILS step: category/title/description/price/photo -->
+        <div id="event-step-details">
+          <div id="event-preset-summary" class="preset-summary" hidden>
+            <div id="event-preset-summary-thumb" class="preset-summary-thumb"></div>
+            <div class="preset-summary-info">
+              <span class="preset-summary-cat" id="event-preset-summary-cat"></span>
+              <div class="preset-summary-title" id="event-preset-summary-title"></div>
+              <div class="preset-summary-price" id="event-preset-summary-price"></div>
+            </div>
           </div>
-          <button type="button" class="preset-summary-edit" id="btn-toggle-full-fields">Edit details</button>
+          <div id="event-detail-fields">
+            <label><span>Category *</span><input type="text" id="event-category" required></label>
+            <label><span>Title *</span><input type="text" id="event-title" required></label>
+            <label><span>Description</span><textarea id="event-description"></textarea></label>
+            <label><span>Price</span><input type="text" id="event-price" placeholder="e.g. $65 per seat"></label>
+            <label><span>Photo</span><input type="file" id="event-photo" accept="image/*"></label>
+            <p class="photo-preview" style="margin-top:-6px;">Picking a photo opens a quick crop tool.</p>
+            <div id="event-photo-current" class="photo-preview"></div>
+          </div>
         </div>
 
-        <div id="event-full-fields">
-          <label><span>Category *</span><input type="text" id="event-category" required></label>
-          <label><span>Title *</span><input type="text" id="event-title" required></label>
-          <label><span>Description</span><textarea id="event-description"></textarea></label>
-          <label><span>Price</span><input type="text" id="event-price" placeholder="e.g. $65 per seat"></label>
-          <label><span>Photo</span><input type="file" id="event-photo" accept="image/*"></label>
-          <p class="photo-preview" style="margin-top:-6px;">Picking a photo opens a quick crop tool.</p>
-          <div id="event-photo-current" class="photo-preview"></div>
+        <!-- SCHEDULE step: date/time/visibility -->
+        <div id="event-step-schedule">
+          <div id="event-schedule-summary" class="preset-summary" hidden>
+            <div id="event-schedule-summary-thumb" class="preset-summary-thumb"></div>
+            <div class="preset-summary-info">
+              <span class="preset-summary-cat" id="event-schedule-summary-cat"></span>
+              <div class="preset-summary-title" id="event-schedule-summary-title"></div>
+            </div>
+          </div>
+          <div class="schedule-grid">
+            <label><span>Date *</span><input type="date" id="event-date" required></label>
+            <div class="schedule-time-row">
+              <label><span>Start time</span><input type="time" id="event-start-time"></label>
+              <label><span>End time</span><input type="time" id="event-end-time"></label>
+            </div>
+            <label class="checkbox-row"><input type="checkbox" id="event-active" checked><span>Visible on site</span></label>
+          </div>
         </div>
-
-        <div class="form-grid" style="margin-bottom:0;">
-          <label><span>Date *</span><input type="date" id="event-date" required></label>
-          <label><span>Start time</span><input type="time" id="event-start-time"></label>
-          <label><span>End time</span><input type="time" id="event-end-time"></label>
-        </div>
-        <label class="checkbox-row"><input type="checkbox" id="event-active" checked><span>Visible on site</span></label>
 
         <div class="modal-actions">
           <div style="margin-right:auto;display:flex;gap:14px;align-items:center;">
             <button type="button" class="btn-link" id="btn-duplicate-event" hidden>Duplicate to new date</button>
-            <button type="button" class="btn-link" id="btn-delete-event" style="color:var(--danger);">Delete</button>
+            <button type="button" class="btn-link" id="btn-delete-event" style="color:var(--danger);" hidden>Delete</button>
           </div>
           <button type="button" class="btn-outline" id="btn-cancel-event">Cancel</button>
-          <button type="submit" class="btn-solid">Save Class</button>
+          <button type="button" class="btn-outline" id="btn-back-step" hidden>&larr; Back</button>
+          <button type="button" class="btn-solid" id="btn-next-step" hidden>Next &rarr;</button>
+          <button type="submit" class="btn-solid" id="btn-save-event">Save Class</button>
         </div>
         <div id="event-form-status" class="status-msg"></div>
       </form>

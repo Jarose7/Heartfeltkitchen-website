@@ -117,10 +117,16 @@ h1,h2{font-family:'Montserrat',sans-serif;font-weight:700;margin:0;}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px;}
 .form-grid .full{grid-column:1/-1;}
 .content-form label,.login-form label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;}
-.content-form input,.content-form textarea,#item-form input,#item-form textarea,#item-form select{
+.content-form input,.content-form textarea,
+#item-form input,#item-form textarea,#item-form select,
+#preset-form input,#preset-form textarea,#preset-form select,
+#event-form input,#event-form textarea,#event-form select{
   padding:10px 13px;border:1.5px solid var(--line);font-family:'Manrope',sans-serif;font-size:14px;color:var(--cocoa);background:var(--white);
 }
-.content-form input:focus,#item-form input:focus,#item-form textarea:focus,#item-form select:focus{outline:none;border-color:var(--cocoa);}
+.content-form input:focus,
+#item-form input:focus,#item-form textarea:focus,#item-form select:focus,
+#preset-form input:focus,#preset-form textarea:focus,#preset-form select:focus,
+#event-form input:focus,#event-form textarea:focus,#event-form select:focus{outline:none;border-color:var(--cocoa);}
 .content-form textarea{min-height:90px;resize:vertical;}
 .form-section-label{font-size:16px;margin:28px 0 4px;text-transform:uppercase;letter-spacing:.03em;}
 .content-form .form-section-label:first-of-type{margin-top:28px;}
@@ -151,10 +157,22 @@ h1,h2{font-family:'Montserrat',sans-serif;font-weight:700;margin:0;}
 .modal-card{background:var(--white);padding:32px;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;animation:modal-pop .16s ease;}
 @keyframes modal-pop{from{opacity:0;transform:scale(.97) translateY(6px);}to{opacity:1;transform:scale(1) translateY(0);}}
 .modal-card h2{font-size:18px;margin-bottom:20px;}
-#item-form{display:flex;flex-direction:column;gap:14px;}
-#item-form label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;}
-#item-form textarea{min-height:80px;resize:vertical;}
+#item-form,#preset-form,#event-form{display:flex;flex-direction:column;gap:14px;}
+#item-form label,#preset-form label,#event-form label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;}
+#item-form textarea,#preset-form textarea,#event-form textarea{min-height:80px;resize:vertical;}
 .checkbox-row{flex-direction:row !important;align-items:center;gap:8px !important;}
+
+/* ---- event modal: step wizard ---- */
+.event-modal-card{max-width:440px;}
+#event-step-details{display:flex;flex-direction:column;gap:14px;}
+.schedule-grid{display:flex;flex-direction:column;gap:18px;padding-top:2px;}
+.schedule-time-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.modal-steps{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:18px;}
+.modal-steps[hidden]{display:none;}
+.modal-step-dot{width:24px;height:24px;border-radius:50%;background:var(--cream);border:1.5px solid var(--line);color:#8a7862;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;transition:background .15s ease,border-color .15s ease,color .15s ease;}
+.modal-step-dot.is-active{background:var(--cocoa);border-color:var(--cocoa);color:var(--cream);}
+.modal-step-dot.is-done{background:var(--tan);border-color:var(--tan);color:var(--cocoa);}
+.modal-step-line{width:32px;height:1.5px;background:var(--line);}
 .photo-preview{font-size:12.5px;color:#6b5c4c;}
 .photo-preview img{max-width:100px;display:block;margin-top:6px;border:1px solid var(--line);}
 .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:6px;}
