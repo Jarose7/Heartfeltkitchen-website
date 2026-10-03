@@ -151,6 +151,7 @@
 
       const submitBtn = form.querySelector('button[type="submit"]');
       submitBtn.disabled = true;
+      submitBtn.classList.add('loading');
       submitBtn.textContent = 'Submitting…';
 
       try {
@@ -174,6 +175,7 @@
         statusBox.textContent = 'Something went wrong submitting your inquiry. Please try again or email heartfeltkitchen@gmail.com directly.';
       } finally {
         submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
         submitBtn.textContent = 'Submit Inquiry';
       }
     });
