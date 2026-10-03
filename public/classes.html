@@ -20,8 +20,16 @@
   .cal-cell .cal-day-num{font-size:12.5px;font-weight:700;color:var(--taupe);font-family:'Montserrat',sans-serif;}
   .cal-cell.is-outside .cal-day-num{color:#ddd0bc;}
   .cal-cell.is-today .cal-day-num{color:var(--cocoa);text-decoration:underline;}
-  .cal-event-chip{all:unset;cursor:pointer;font-size:11px;padding:4px 7px;background:var(--cream);color:var(--cocoa);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid var(--tan);transition:background .15s ease;}
-  .cal-event-chip:hover{background:var(--tan);}
+  .cal-event-chip{all:unset;cursor:pointer;font-size:11px;padding:4px 7px;background:var(--cream);color:var(--cocoa);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid var(--tan);transition:background .15s ease,transform .15s ease;animation:cal-chip-pop .25s ease backwards;}
+  .cal-event-chip:hover{background:var(--tan);transform:translateX(1px);}
+  .cal-event-chip:nth-child(2){animation-delay:.03s;}
+  .cal-event-chip:nth-child(3){animation-delay:.06s;}
+  @keyframes cal-chip-pop{from{opacity:0;transform:scale(.85);}to{opacity:1;transform:scale(1);}}
+
+  .cal-grid.anim-next{animation:cal-slide-in-right .3s ease;}
+  .cal-grid.anim-prev{animation:cal-slide-in-left .3s ease;}
+  @keyframes cal-slide-in-right{from{opacity:0;transform:translateX(18px);}to{opacity:1;transform:translateX(0);}}
+  @keyframes cal-slide-in-left{from{opacity:0;transform:translateX(-18px);}to{opacity:1;transform:translateX(0);}}
   .cal-empty-note{text-align:center;color:#6b5c4c;font-size:14px;padding:4px 0 0;}
 
   .evt-modal-overlay{position:fixed;inset:0;background:rgba(20,12,7,0.55);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;}
@@ -40,6 +48,11 @@
     .cal-cell{min-height:72px;font-size:11px;padding:5px;}
     .cal-weekday{font-size:9px;padding:6px 2px;}
     .cal-nav h2{min-width:150px;font-size:16px;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .cal-event-chip{animation:none;}
+    .cal-grid.anim-next,.cal-grid.anim-prev{animation:none;}
   }
 </style>
 </head>
@@ -141,6 +154,7 @@
         const calendarMonth = new Date();
         calendarMonth.setDate(1);
         let calendarEvents = [];
+        let navDirection = null; // 'next' | 'prev' | null (null = no animation, e.g. first load)
 
         function monthParam(date) {
           return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -228,8 +242,19 @@
             `;
           }
 
+          calGridEl.classList.remove('anim-next', 'anim-prev');
           calGridEl.innerHTML = weekdayHeaders + cellsHtml;
           calEmptyNote.hidden = hasAnyThisMonth;
+
+          if (navDirection) {
+            // Force a reflow before re-adding the class so the animation
+            // restarts even when navigating the same direction twice in a
+            // row (otherwise the browser sees "the class is already set"
+            // and skips replaying it).
+            void calGridEl.offsetWidth;
+            calGridEl.classList.add(navDirection === 'next' ? 'anim-next' : 'anim-prev');
+          }
+          navDirection = null;
 
           calGridEl.querySelectorAll('.cal-event-chip').forEach((chip) => {
             chip.addEventListener('click', () => {
@@ -240,10 +265,12 @@
         }
 
         document.getElementById('cal-prev').addEventListener('click', () => {
+          navDirection = 'prev';
           calendarMonth.setMonth(calendarMonth.getMonth() - 1);
           loadClassEvents();
         });
         document.getElementById('cal-next').addEventListener('click', () => {
+          navDirection = 'next';
           calendarMonth.setMonth(calendarMonth.getMonth() + 1);
           loadClassEvents();
         });
