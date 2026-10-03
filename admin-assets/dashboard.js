@@ -359,6 +359,26 @@
 
   let classPresets = [];
 
+  // A small fixed palette for the category names already in use, plus a
+  // deterministic fallback (hashed from the category text) for anything
+  // custom someone types in later — so color-coding never needs updating
+  // by hand as new categories show up, and the same category always gets
+  // the same color across presets, the picker, and the calendar.
+  const CATEGORY_COLORS = {
+    baking: '#c98a4b',
+    bread: '#8a6a45',
+    chocolate: '#6b4330',
+    global: '#4b7a8a',
+  };
+  const CATEGORY_COLOR_FALLBACKS = ['#a9785a', '#7a8a5a', '#8a5a7a', '#5a7a8a', '#8a7a4b'];
+  function categoryColor(category) {
+    const key = (category || '').trim().toLowerCase();
+    if (CATEGORY_COLORS[key]) return CATEGORY_COLORS[key];
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+    return CATEGORY_COLOR_FALLBACKS[hash % CATEGORY_COLOR_FALLBACKS.length];
+  }
+
   const presetsListEl = document.getElementById('class-presets-list');
   const presetModal = document.getElementById('preset-modal');
   const presetForm = document.getElementById('preset-form');
@@ -402,9 +422,11 @@
       return;
     }
     presetsListEl.innerHTML = classPresets.map((p) => `
-      <div class="hp-card" data-id="${p.id}">
+      <div class="hp-card preset-card" data-id="${p.id}" style="border-left-color:${categoryColor(p.category)};">
         <div class="hp-thumb" style="${p.has_photo ? `background-image:url('${presetPhotoUrl(p)}')` : ''}">${p.has_photo ? '' : '<span>No photo</span>'}</div>
-        <div class="hp-label">${escapeHtml(p.category)} — ${escapeHtml(p.title)}</div>
+        <div class="preset-card-cat" style="color:${categoryColor(p.category)};">${escapeHtml(p.category)}</div>
+        <div class="hp-label">${escapeHtml(p.title)}</div>
+        ${p.price_text ? `<div class="preset-card-price">${escapeHtml(p.price_text)}</div>` : ''}
         <div class="hp-actions">
           <button class="preset-edit-btn">Edit</button>
           <button class="preset-delete-btn hp-revert-btn">Delete</button>
@@ -554,7 +576,7 @@
       const dayEvents = eventsByDate[dateStr] || [];
 
       const chipsHtml = dayEvents.map((ev) => `
-        <button type="button" class="cal-event-chip ${!ev.active ? 'is-hidden' : ''}" data-id="${ev.id}">${escapeHtml(ev.title)}</button>
+        <button type="button" class="cal-event-chip ${!ev.active ? 'is-hidden' : ''}" data-id="${ev.id}" style="border-left-color:${categoryColor(ev.category)};">${escapeHtml(ev.title)}</button>
       `).join('');
 
       cellsHtml += `
@@ -591,6 +613,11 @@
     calendarMonth.setMonth(calendarMonth.getMonth() + 1);
     loadClassEvents();
   });
+  document.getElementById('cal-today').addEventListener('click', () => {
+    const now = new Date();
+    calendarMonth.setFullYear(now.getFullYear(), now.getMonth(), 1);
+    loadClassEvents();
+  });
 
   function loadClassesView() {
     loadClassPresets();
@@ -612,8 +639,8 @@
       classPickerPresetsEl.innerHTML = '<p class="picker-empty">No presets yet — add one above, or build this class from scratch below.</p>';
     } else {
       classPickerPresetsEl.innerHTML = classPresets.map((p) => `
-        <button type="button" class="picker-preset-btn" data-id="${p.id}">
-          <span><span class="cat">${escapeHtml(p.category)}</span><br>${escapeHtml(p.title)}</span>
+        <button type="button" class="picker-preset-btn" data-id="${p.id}" style="border-left-color:${categoryColor(p.category)};">
+          <span><span class="cat" style="color:${categoryColor(p.category)};">${escapeHtml(p.category)}</span><br>${escapeHtml(p.title)}</span>
           <span>&rarr;</span>
         </button>
       `).join('');
@@ -643,6 +670,10 @@
   const eventPhotoInput = document.getElementById('event-photo');
   const eventPhotoCurrent = document.getElementById('event-photo-current');
   const btnDeleteEvent = document.getElementById('btn-delete-event');
+  const btnDuplicateEvent = document.getElementById('btn-duplicate-event');
+  const eventPresetSummary = document.getElementById('event-preset-summary');
+  const eventFullFields = document.getElementById('event-full-fields');
+  const btnToggleFullFields = document.getElementById('btn-toggle-full-fields');
   let croppedEventPhotoBlob = null;
 
   eventPhotoInput.addEventListener('change', () => {
@@ -659,6 +690,13 @@
   // `event` = existing event being edited (null for a new one). `preset` =
   // the preset to prefill from when creating a new event (null for custom).
   // `dateStr` = the date to prefill when creating a new event.
+  //
+  // Scheduling FROM a preset is the common case, so that path starts
+  // collapsed to just date/time behind a read-only preset summary card —
+  // Becca doesn't have to look at (or accidentally edit) the title/
+  // description/price/photo every single time. Editing an existing event,
+  // or building a custom one from scratch, always shows every field, since
+  // there's no "known good" prefill to hide behind in either case.
   function openEventModal(event, preset, dateStr) {
     eventFormStatus.className = '';
     eventFormStatus.textContent = '';
@@ -685,11 +723,83 @@
       eventPhotoCurrent.innerHTML = '';
     }
 
+    const startFromPresetCollapsed = !event && preset;
+    if (startFromPresetCollapsed) {
+      document.getElementById('event-preset-summary-cat').textContent = preset.category;
+      document.getElementById('event-preset-summary-title').textContent = preset.title;
+      document.getElementById('event-preset-summary-price').textContent = preset.price_text || '';
+      const thumb = document.getElementById('event-preset-summary-thumb');
+      thumb.style.backgroundImage = preset.has_photo ? `url('${presetPhotoUrl(preset)}')` : '';
+      eventPresetSummary.hidden = false;
+      eventFullFields.hidden = true;
+    } else {
+      eventPresetSummary.hidden = true;
+      eventFullFields.hidden = false;
+    }
+
     btnDeleteEvent.style.display = event ? '' : 'none';
+    btnDuplicateEvent.hidden = !event;
     eventModal.hidden = false;
   }
 
+  btnToggleFullFields.addEventListener('click', () => {
+    eventPresetSummary.hidden = true;
+    eventFullFields.hidden = false;
+  });
+
   document.getElementById('btn-cancel-event').addEventListener('click', () => { eventModal.hidden = true; });
+
+  // Clones the form's CURRENT values (including any unsaved edits) into a
+  // fresh "Add Class" form with the id cleared, so saving creates a new
+  // event instead of overwriting this one — the quickest way to schedule
+  // the same class again. Defaults the date a week later since that's the
+  // most common case (a weekly class), but it's still just a normal date
+  // field, easy to change before saving. The photo is carried over too
+  // (re-fetched from this event's own photo route) so it doesn't have to
+  // be re-cropped, unless there wasn't one to begin with.
+  btnDuplicateEvent.addEventListener('click', async () => {
+    const originalId = document.getElementById('event-id').value;
+    const hadPhoto = Boolean(eventPhotoCurrent.querySelector('img'));
+    const fields = {
+      category: document.getElementById('event-category').value,
+      title: document.getElementById('event-title').value,
+      description: document.getElementById('event-description').value,
+      price: document.getElementById('event-price').value,
+      presetId: document.getElementById('event-preset-id').value,
+      startTime: document.getElementById('event-start-time').value,
+      endTime: document.getElementById('event-end-time').value,
+    };
+    const dateVal = document.getElementById('event-date').value;
+    let nextDate = dateVal;
+    if (dateVal) {
+      const [y, m, d] = dateVal.split('-').map(Number);
+      const dt = new Date(y, m - 1, d);
+      dt.setDate(dt.getDate() + 7);
+      nextDate = formatDateLocal(dt);
+    }
+
+    openEventModal(null, null, nextDate);
+    document.getElementById('event-modal-title').textContent = 'Duplicate Class';
+    document.getElementById('event-preset-id').value = fields.presetId;
+    document.getElementById('event-category').value = fields.category;
+    document.getElementById('event-title').value = fields.title;
+    document.getElementById('event-description').value = fields.description;
+    document.getElementById('event-price').value = fields.price;
+    document.getElementById('event-start-time').value = fields.startTime;
+    document.getElementById('event-end-time').value = fields.endTime;
+
+    if (hadPhoto && originalId) {
+      try {
+        const res = await fetch(`/class-photo/${originalId}`);
+        const blob = await res.blob();
+        croppedEventPhotoBlob = blob;
+        const url = URL.createObjectURL(blob);
+        eventPhotoCurrent.innerHTML = `Using original photo: <img src="${url}" alt="">`;
+      } catch (err) {
+        // Not fatal — just means the photo needs re-adding by hand.
+      }
+    }
+  });
 
   eventForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -835,6 +945,19 @@
       alert('Failed to delete this inquiry. Try again.');
     }
   }
+
+  // ---- modal dismissal (click the backdrop, or press Escape) -----------
+  // Applies to every modal in the admin panel — a small but real speed-up
+  // when you're moving quickly through a bunch of edits in a row.
+
+  const dismissableModals = [modal, presetModal, classPickerModal, eventModal];
+  dismissableModals.forEach((m) => {
+    m.addEventListener('click', (e) => { if (e.target === m) m.hidden = true; });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    dismissableModals.forEach((m) => { if (!m.hidden) m.hidden = true; });
+  });
 
   // initial load
   loadMenuItems();
