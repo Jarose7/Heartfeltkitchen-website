@@ -9,18 +9,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
 <style>
-  /* Real photos dropped in from Becca's Drive folder (2026-09-19) — placeholders
-     removed for these specific slots. Everything else on the homepage is still
-     pending real photos. */
-  .cat-grid .cat-card:nth-child(1) .cat-photo{background-image:url('/images/custom-cakes-castle.jpg');background-size:cover;background-position:center;}
-  .cat-grid .cat-card:nth-child(2) .cat-photo{background-image:url('/images/cupcakes-card.jpg');background-size:cover;background-position:center;}
-  .cat-grid .cat-card:nth-child(3) .cat-photo{background-image:url('/images/cookies-card.jpg');background-size:cover;background-position:center;}
-  .cat-grid .cat-card:nth-child(4) .cat-photo{background-image:url('/images/classes-card.jpg');background-size:cover;background-position:center;}
-  .cat-grid .cat-card:nth-child(5) .cat-photo{background-image:url('/images/catering-card.jpg');background-size:cover;background-position:center;}
-  .tier-grid .tier-card:nth-child(1) .tier-photo{background-image:url('/images/cupcakes-cookies-tier.jpg');background-size:cover;background-position:center;}
-  .tier-grid .tier-card:nth-child(2) .tier-photo{background-image:url('/images/custom-cakes-tier.jpg');background-size:cover;background-position:center;}
-  .growing-photo:nth-child(1){background-image:url('/images/garden-carrots.jpg');background-size:cover;background-position:center;}
-  .growing-photo:nth-child(2){background-image:url('/images/garden-flower.jpg');background-size:cover;background-position:center;}
+  /* Category cards, pricing tiers, and garden photos are now editable from
+     Site Admin → Homepage Photos — this block is generated server-side
+     (see RAW_HOMEPAGE_PHOTOS_CSS in server.js / lib/render.js) so it
+     reflects whatever's actually stored, falling back to the original
+     photos for any slot nobody has changed yet. */
+  {{RAW_HOMEPAGE_PHOTOS_CSS}}
 </style>
 </head>
 <body>

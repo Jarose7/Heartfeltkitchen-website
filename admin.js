@@ -23,6 +23,7 @@ const session = require("express-session");
 const pgSession = require("connect-pg-simple")(session);
 const bcrypt = require("bcryptjs");
 const multer = require("multer");
+const { HOMEPAGE_PHOTO_SLOTS, getHomepagePhotoOverrides, homepagePhotoUrl } = require("./lib/render");
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -84,6 +85,28 @@ function buildAdminRouter(pool) {
       res.send(photo);
     } catch (err) {
       console.error("Failed to load menu photo:", err);
+      res.status(500).end();
+    }
+  });
+
+  // Same pattern as /menu-photo/:id above — public, unauthenticated, ahead
+  // of the session middleware, so it keeps working even if sessions ever
+  // break. Serves a homepage photo override (see schema-homepage-photos.sql
+  // and HOMEPAGE_PHOTO_SLOTS in lib/render.js); slots with no override use
+  // the original hardcoded image directly and never hit this route.
+  router.get("/homepage-photo/:slug", async (req, res) => {
+    try {
+      const result = await pool.query(
+        "SELECT photo, photo_mime FROM homepage_photos WHERE slug=$1 AND photo IS NOT NULL",
+        [req.params.slug]
+      );
+      if (result.rows.length === 0) return res.status(404).end();
+      const { photo, photo_mime } = result.rows[0];
+      res.set("Content-Type", photo_mime || "image/jpeg");
+      res.set("Cache-Control", "public, max-age=3600");
+      res.send(photo);
+    } catch (err) {
+      console.error("Failed to load homepage photo:", err);
       res.status(500).end();
     }
   });
@@ -337,6 +360,65 @@ function buildAdminRouter(pool) {
     } catch (err) {
       console.error("Failed to update site content:", err);
       res.status(500).json({ error: "Failed to update site content." });
+    }
+  });
+
+  // ---- homepage photos API ----------------------------------------------
+  // A fixed list of named slots (see HOMEPAGE_PHOTO_SLOTS) rather than a
+  // free-form list like menu items — each slot either has a database
+  // override or falls back to its original hardcoded photo.
+
+  router.get("/api/admin/homepage-photos", requireAdminApi, async (req, res) => {
+    try {
+      const overrides = await getHomepagePhotoOverrides(pool);
+      const slots = HOMEPAGE_PHOTO_SLOTS.map((slot) => {
+        const overrideAt = overrides[slot.slug];
+        return {
+          slug: slot.slug,
+          label: slot.label,
+          aspect: slot.aspect,
+          hasOverride: Boolean(overrideAt),
+          photoUrl: overrideAt ? homepagePhotoUrl(slot.slug, overrideAt) : slot.fallback,
+        };
+      });
+      res.json({ slots });
+    } catch (err) {
+      console.error("Failed to load homepage photo status:", err);
+      res.status(500).json({ error: "Failed to load homepage photos." });
+    }
+  });
+
+  router.put("/api/admin/homepage-photos/:slug", requireAdminApi, upload.single("photo"), async (req, res) => {
+    const { slug } = req.params;
+    if (!HOMEPAGE_PHOTO_SLOTS.some((slot) => slot.slug === slug)) {
+      return res.status(404).json({ error: "Unknown homepage photo slot." });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: "A photo is required." });
+    }
+    try {
+      await pool.query(
+        `INSERT INTO homepage_photos (slug, photo, photo_mime, updated_at) VALUES ($1,$2,$3,now())
+         ON CONFLICT (slug) DO UPDATE SET photo=EXCLUDED.photo, photo_mime=EXCLUDED.photo_mime, updated_at=now()`,
+        [slug, req.file.buffer, req.file.mimetype]
+      );
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Failed to save homepage photo:", err);
+      res.status(500).json({ error: "Failed to save homepage photo." });
+    }
+  });
+
+  // Clears a slot's override so it goes back to showing its original,
+  // hardcoded photo (or, for the one slot that never had one, back to the
+  // "photo pending" placeholder).
+  router.delete("/api/admin/homepage-photos/:slug", requireAdminApi, async (req, res) => {
+    try {
+      await pool.query("DELETE FROM homepage_photos WHERE slug=$1", [req.params.slug]);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Failed to revert homepage photo:", err);
+      res.status(500).json({ error: "Failed to revert homepage photo." });
     }
   });
 

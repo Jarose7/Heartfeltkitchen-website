@@ -16,6 +16,7 @@
       <nav class="sidebar-nav">
         <button class="nav-item active" data-view="menu-items">Menu Items</button>
         <button class="nav-item" data-view="site-content">Site Content</button>
+        <button class="nav-item" data-view="homepage-photos">Homepage Photos</button>
         <button class="nav-item" data-view="inquiries">Inquiries</button>
       </nav>
       <form method="POST" action="/admin/logout" class="sidebar-logout">
@@ -76,6 +77,17 @@
           <button type="submit" class="btn-solid">Save Changes</button>
           <div id="content-status" class="status-msg"></div>
         </form>
+      </section>
+
+      <!-- HOMEPAGE PHOTOS VIEW -->
+      <section id="view-homepage-photos" class="admin-view" hidden>
+        <div class="view-head">
+          <div>
+            <h1>Homepage Photos</h1>
+            <p>Photos shown in the category cards, pricing tiers, and garden section on the home page.</p>
+          </div>
+        </div>
+        <div id="homepage-photos-list" class="hp-grid"></div>
       </section>
 
       <!-- INQUIRIES VIEW -->

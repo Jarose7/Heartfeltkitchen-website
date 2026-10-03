@@ -6,6 +6,7 @@
   const views = {
     'menu-items': document.getElementById('view-menu-items'),
     'site-content': document.getElementById('view-site-content'),
+    'homepage-photos': document.getElementById('view-homepage-photos'),
     'inquiries': document.getElementById('view-inquiries'),
   };
 
@@ -16,6 +17,7 @@
       Object.entries(views).forEach(([key, el]) => { el.hidden = key !== btn.dataset.view; });
       if (btn.dataset.view === 'menu-items') loadMenuItems();
       if (btn.dataset.view === 'site-content') loadSiteContent();
+      if (btn.dataset.view === 'homepage-photos') loadHomepagePhotos();
       if (btn.dataset.view === 'inquiries') loadInquiries();
     });
   });
@@ -217,6 +219,86 @@
       loadMenuItems();
     } catch (err) {
       alert('Failed to delete this item. Try again.');
+    }
+  }
+
+  // ---- homepage photos ---------------------------------------------------
+  // A fixed set of named slots (not a free-form list like menu items),
+  // each either overridden with an uploaded photo or still showing its
+  // original hardcoded one. Reuses the same crop tool as menu items, just
+  // with each slot's own aspect ratio.
+
+  const hpList = document.getElementById('homepage-photos-list');
+
+  async function loadHomepagePhotos() {
+    hpList.innerHTML = '<div class="empty-state">Loading…</div>';
+    try {
+      const res = await fetch('/api/admin/homepage-photos');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load');
+      renderHomepagePhotos(data.slots);
+    } catch (err) {
+      hpList.innerHTML = '<div class="empty-state">Couldn\'t load homepage photos. Try refreshing.</div>';
+    }
+  }
+
+  function renderHomepagePhotos(slots) {
+    hpList.innerHTML = slots.map((slot) => `
+      <div class="hp-card" data-slug="${slot.slug}">
+        <div class="hp-thumb" style="${slot.photoUrl ? `background-image:url('${slot.photoUrl}')` : ''}">${slot.photoUrl ? '' : '<span>No photo yet</span>'}</div>
+        <div class="hp-label">${escapeHtml(slot.label)}</div>
+        <div class="hp-actions">
+          <button class="hp-change-btn">Change Photo</button>
+          ${slot.hasOverride ? '<button class="hp-revert-btn">Revert to Original</button>' : ''}
+        </div>
+        <input type="file" accept="image/*" class="hp-photo-input" hidden>
+      </div>
+    `).join('');
+
+    hpList.querySelectorAll('.hp-card').forEach((card) => {
+      const slug = card.dataset.slug;
+      const slot = slots.find((s) => s.slug === slug);
+      const fileInput = card.querySelector('.hp-photo-input');
+
+      card.querySelector('.hp-change-btn').addEventListener('click', () => fileInput.click());
+
+      fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        fileInput.value = '';
+        if (!file) return;
+        openImageCropper(file, { aspect: slot.aspect }, (blob) => {
+          if (!blob) return; // canceled
+          uploadHomepagePhoto(slug, blob);
+        });
+      });
+
+      const revertBtn = card.querySelector('.hp-revert-btn');
+      if (revertBtn) {
+        revertBtn.addEventListener('click', () => revertHomepagePhoto(slug, slot.label));
+      }
+    });
+  }
+
+  async function uploadHomepagePhoto(slug, blob) {
+    const formData = new FormData();
+    formData.append('photo', blob, 'photo.jpg');
+    try {
+      const res = await fetch(`/api/admin/homepage-photos/${slug}`, { method: 'PUT', body: formData });
+      if (!res.ok) throw new Error();
+      loadHomepagePhotos();
+    } catch (err) {
+      alert('Failed to save this photo. Try again.');
+    }
+  }
+
+  async function revertHomepagePhoto(slug, label) {
+    if (!confirm(`Revert "${label}" back to its original photo?`)) return;
+    try {
+      const res = await fetch(`/api/admin/homepage-photos/${slug}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error();
+      loadHomepagePhotos();
+    } catch (err) {
+      alert('Failed to revert this photo. Try again.');
     }
   }
 

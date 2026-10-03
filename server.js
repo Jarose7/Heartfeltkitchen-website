@@ -8,7 +8,7 @@ const express = require("express");
 const path = require("path");
 const pool = require("./db");
 const buildAdminRouter = require("./admin");
-const { renderTemplate, getSiteContent, getMenuItems, menuItemCardHtml, textBlockToHtml } = require("./lib/render");
+const { renderTemplate, getSiteContent, getMenuItems, menuItemCardHtml, textBlockToHtml, getHomepagePhotosCss } = require("./lib/render");
 const { sendInquiryToFlodesk } = require("./lib/flodesk");
 const { sendInquiryNotification } = require("./lib/email");
 
@@ -67,7 +67,10 @@ const POLICY_FALLBACKS = {
 
 // Builds the extra {{RAW_...}} fragments a given route's template needs,
 // on top of the plain site_content fields every page already gets.
-function buildPageExtras(route, content) {
+async function buildPageExtras(route, content, pool) {
+  if (route === "/") {
+    return { RAW_HOMEPAGE_PHOTOS_CSS: await getHomepagePhotosCss(pool) };
+  }
   if (route === "/about") {
     return {
       RAW_ABOUT_HERO: textBlockToHtml(content.about_hero_text, ABOUT_FALLBACKS.about_hero_text),
@@ -90,7 +93,8 @@ Object.entries(dynamicPages).forEach(([route, file]) => {
   app.get(route, async (req, res, next) => {
     try {
       const content = await getSiteContent(pool);
-      const html = renderTemplate(path.join(PUBLIC_DIR, file), { ...content, ...buildPageExtras(route, content) });
+      const extras = await buildPageExtras(route, content, pool);
+      const html = renderTemplate(path.join(PUBLIC_DIR, file), { ...content, ...extras });
       res.send(html);
     } catch (err) {
       next(); // fall through to static file serving as a last resort
