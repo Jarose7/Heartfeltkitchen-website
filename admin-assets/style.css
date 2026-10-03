@@ -165,6 +165,7 @@ h1,h2{font-family:'Montserrat',sans-serif;font-weight:700;margin:0;}
 /* ---- event modal: step wizard ---- */
 .event-modal-card{max-width:440px;}
 #event-step-details{display:flex;flex-direction:column;gap:14px;}
+#event-step-details[hidden],#event-step-schedule[hidden]{display:none;}
 .schedule-grid{display:flex;flex-direction:column;gap:18px;padding-top:2px;}
 .schedule-time-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 .modal-steps{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:18px;}
