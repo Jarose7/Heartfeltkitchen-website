@@ -11,10 +11,13 @@
   .about-hero{padding-top:60px;padding-bottom:70px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
   .about-hero h1{font-size:38px;line-height:1.15;margin-bottom:18px;max-width:480px;text-transform:uppercase;}
   .about-hero p{max-width:440px;font-size:15.5px;color:#6b5c4c;}
+  /* Editable from Site Admin -> Site Photos (see RAW_ABOUT_PHOTOS_CSS in
+     server.js / lib/render.js) — falls back to the original portrait
+     until someone uploads a replacement. */
   .about-hero-photo{
-    height:520px;background-size:cover;background-position:center top;
-    background-image:url('/images/becca-portrait.jpg');
+    height:520px;
   }
+  {{RAW_ABOUT_PHOTOS_CSS}}
   .story{background:var(--cream);}
   .story-grid{display:grid;grid-template-columns:1fr 1.3fr;gap:70px;align-items:start;}
   .story h2{font-size:28px;margin-bottom:22px;max-width:420px;text-transform:uppercase;}

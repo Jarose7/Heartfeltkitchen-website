@@ -69,7 +69,7 @@ const POLICY_FALLBACKS = {
 // on top of the plain site_content fields every page already gets.
 async function buildPageExtras(route, content, pool) {
   if (route === "/") {
-    return { RAW_HOMEPAGE_PHOTOS_CSS: await getHomepagePhotosCss(pool) };
+    return { RAW_HOMEPAGE_PHOTOS_CSS: await getHomepagePhotosCss(pool, "/") };
   }
   if (route === "/about") {
     return {
@@ -78,6 +78,7 @@ async function buildPageExtras(route, content, pool) {
       RAW_ABOUT_STORY_P2: textBlockToHtml(content.about_story_p2, ABOUT_FALLBACKS.about_story_p2),
       RAW_ABOUT_STORY_P3: textBlockToHtml(content.about_story_p3, ABOUT_FALLBACKS.about_story_p3),
       RAW_ABOUT_PHILOSOPHY: textBlockToHtml(content.about_philosophy_text, ABOUT_FALLBACKS.about_philosophy_text),
+      RAW_ABOUT_PHOTOS_CSS: await getHomepagePhotosCss(pool, "/about"),
     };
   }
   if (route === "/policies") {
