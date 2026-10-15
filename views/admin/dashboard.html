@@ -261,14 +261,16 @@
         </div>
 
         <div class="modal-actions">
-          <div style="margin-right:auto;display:flex;gap:14px;align-items:center;">
-            <button type="button" class="btn-link" id="btn-duplicate-event" hidden>Duplicate to new date</button>
-            <button type="button" class="btn-link" id="btn-delete-event" style="color:var(--danger);" hidden>Delete</button>
+          <div id="event-modal-utility" class="modal-actions-utility" hidden>
+            <button type="button" class="btn-link" id="btn-duplicate-event">Duplicate to new date</button>
+            <button type="button" class="btn-link btn-link-danger" id="btn-delete-event">Delete</button>
           </div>
-          <button type="button" class="btn-outline" id="btn-cancel-event">Cancel</button>
-          <button type="button" class="btn-outline" id="btn-back-step" hidden>&larr; Back</button>
-          <button type="button" class="btn-solid" id="btn-next-step" hidden>Next &rarr;</button>
-          <button type="submit" class="btn-solid" id="btn-save-event">Save Class</button>
+          <div class="modal-actions-primary">
+            <button type="button" class="btn-outline" id="btn-cancel-event">Cancel</button>
+            <button type="button" class="btn-outline" id="btn-back-step" hidden>&larr; Back</button>
+            <button type="button" class="btn-outline" id="btn-next-step" hidden>Next &rarr;</button>
+            <button type="submit" class="btn-solid" id="btn-save-event">Save Class</button>
+          </div>
         </div>
         <div id="event-form-status" class="status-msg"></div>
       </form>

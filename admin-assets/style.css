@@ -9,6 +9,12 @@
   --danger-bg:#fcebeb;
 }
 *{box-sizing:border-box;}
+/* Several classes below use all:unset for a bare-link look, which also
+   resets `display` -- and since author CSS always beats the browser's
+   own [hidden]{display:none} rule, that silently un-hides an all:unset
+   element the moment `hidden` is toggled via JS. This makes the native
+   hidden attribute win no matter what a class does. */
+[hidden]{display:none !important;}
 body{margin:0;background:var(--cream);color:var(--cocoa);font-family:'Manrope',sans-serif;font-size:15px;}
 h1,h2{font-family:'Montserrat',sans-serif;font-weight:700;margin:0;}
 
@@ -67,8 +73,10 @@ h1,h2{font-family:'Montserrat',sans-serif;font-weight:700;margin:0;}
 .nav-item:hover{background:rgba(243,235,221,0.08);}
 .nav-item.active{background:rgba(243,235,221,0.14);color:var(--white);font-weight:600;}
 .sidebar-logout{margin-top:auto;}
-.btn-link{all:unset;cursor:pointer;color:#c9baa4;font-size:13px;padding:8px;}
+.btn-link{background:none;border:none;margin:0;font:inherit;cursor:pointer;color:#c9baa4;font-size:13px;padding:8px;white-space:nowrap;}
 .btn-link:hover{color:var(--cream);}
+.btn-link-danger{color:var(--danger);}
+.btn-link-danger:hover{color:#7a1f1f;}
 
 .admin-main{flex:1;padding:36px 44px;min-width:0;}
 .admin-view[hidden]{display:none;}
@@ -77,9 +85,9 @@ h1,h2{font-family:'Montserrat',sans-serif;font-weight:700;margin:0;}
 .view-head p{font-size:13.5px;color:#6b5c4c;margin:4px 0 0;}
 
 /* ---- buttons ---- */
-.btn-solid{background:var(--cocoa);color:var(--cream);border:none;padding:11px 20px;font-size:13px;font-weight:700;letter-spacing:.03em;cursor:pointer;font-family:'Montserrat',sans-serif;}
+.btn-solid{background:var(--cocoa);color:var(--cream);border:none;padding:11px 20px;font-size:13px;font-weight:700;letter-spacing:.03em;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;}
 .btn-solid:hover{background:#2a1a11;}
-.btn-outline{background:transparent;border:1.5px solid var(--cocoa);color:var(--cocoa);padding:11px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;}
+.btn-outline{background:transparent;border:1.5px solid var(--cocoa);color:var(--cocoa);padding:11px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;}
 
 /* ---- item list ---- */
 .item-list{display:flex;flex-direction:column;border-top:1px solid var(--line);background:var(--white);}
@@ -176,7 +184,10 @@ h1,h2{font-family:'Montserrat',sans-serif;font-weight:700;margin:0;}
 .modal-step-line{width:32px;height:1.5px;background:var(--line);}
 .photo-preview{font-size:12.5px;color:#6b5c4c;}
 .photo-preview img{max-width:100px;display:block;margin-top:6px;border:1px solid var(--line);}
-.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:6px;}
+.modal-actions{display:flex;flex-direction:column;gap:12px;margin-top:20px;padding-top:16px;border-top:1px solid var(--line);}
+.modal-actions-utility{display:flex;gap:18px;align-items:center;flex-wrap:wrap;}
+.modal-actions-utility[hidden]{display:none;}
+.modal-actions-primary{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;}
 
 /* ---- classes: presets + calendar ---- */
 .cal-admin-head{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}

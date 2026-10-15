@@ -669,6 +669,7 @@
   const eventFormStatus = document.getElementById('event-form-status');
   const eventPhotoInput = document.getElementById('event-photo');
   const eventPhotoCurrent = document.getElementById('event-photo-current');
+  const eventModalUtility = document.getElementById('event-modal-utility');
   const btnDeleteEvent = document.getElementById('btn-delete-event');
   const btnDuplicateEvent = document.getElementById('btn-duplicate-event');
   const eventPresetSummary = document.getElementById('event-preset-summary');
@@ -728,7 +729,8 @@
       if (eventStep === 'schedule') {
         btnBackStep.hidden = true;
         btnNextStep.hidden = false;
-        btnNextStep.textContent = 'Edit Full Details →';
+        btnNextStep.className = 'btn-outline'; // secondary -- Save Class is the primary action on this step
+        btnNextStep.textContent = 'Full Details →';
       } else {
         btnNextStep.hidden = true;
         btnBackStep.hidden = false;
@@ -746,6 +748,7 @@
     if (eventStep === 'details') {
       btnBackStep.hidden = true;
       btnNextStep.hidden = false;
+      btnNextStep.className = 'btn-solid'; // the only forward action on this step -- stays primary
       btnNextStep.textContent = 'Next: Schedule →';
       btnSaveEvent.hidden = true;
     } else {
@@ -832,8 +835,12 @@
       eventScheduleSummary.hidden = true;
     }
 
-    btnDeleteEvent.hidden = !event;
-    btnDuplicateEvent.hidden = !event;
+    // Both utility actions only make sense for a class that already
+    // exists on the calendar, and they always show/hide together, so
+    // one wrapper toggle keeps them in sync (see also the [hidden]
+    // safety-net rule in style.css -- .btn-link used to silently
+    // defeat the hidden attribute here).
+    eventModalUtility.hidden = !event;
 
     renderEventStep();
     eventModal.hidden = false;
