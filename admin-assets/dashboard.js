@@ -268,10 +268,18 @@
             <div class="hp-thumb" style="${slot.photoUrl ? `background-image:url('${slot.photoUrl}')` : ''}">${slot.photoUrl ? '' : '<span>No photo yet</span>'}</div>
             <div class="hp-label">${escapeHtml(slot.label)}</div>
             <div class="hp-actions">
-              <button class="hp-change-btn">Change Photo</button>
-              ${slot.hasOverride ? '<button class="hp-revert-btn">Revert to Original</button>' : ''}
+              <label class="hp-change-btn" for="hp-file-${slot.slug}">Change Photo</label>
+              ${slot.hasOverride ? '<button type="button" class="hp-revert-btn">Revert to Original</button>' : ''}
             </div>
-            <input type="file" accept="image/*" class="hp-photo-input" hidden>
+            <!-- A real label-for association, not a styled button that
+                 calls click() on a display:none input -- iOS Safari can
+                 silently refuse to open the file picker for a JS-triggered
+                 click on a hidden input (see the 2026-10-15 iPad report).
+                 Menu items/presets/events already use this exact pattern
+                 successfully; hp-photo-input is visually hidden via the
+                 CSS clip technique below, not the hidden attribute, so it
+                 stays a real, clickable element for the browser. -->
+            <input type="file" accept="image/*" id="hp-file-${slot.slug}" class="hp-photo-input">
           </div>
         `).join('')}
       </div>
@@ -281,8 +289,6 @@
       const slug = card.dataset.slug;
       const slot = slots.find((s) => s.slug === slug);
       const fileInput = card.querySelector('.hp-photo-input');
-
-      card.querySelector('.hp-change-btn').addEventListener('click', () => fileInput.click());
 
       fileInput.addEventListener('change', () => {
         const file = fileInput.files[0];
