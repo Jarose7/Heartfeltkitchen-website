@@ -97,9 +97,11 @@ section{padding:88px 0;}
 .tier-body p.desc{font-size:13.5px;color:#6b5c4c;margin-bottom:18px;}
 
 /* "What We're Growing" — farm/house photo section */
-.growing-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:56px;align-items:center;}
-.growing-photos{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.growing-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:56px;align-items:center;}
+.growing-photos{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;min-width:0;}
+.growing-copy{min-width:0;}
 .growing-photo{
+  width:100%;min-width:0;
   aspect-ratio:3/4;
   background:repeating-linear-gradient(100deg,#6b7a4f,#6b7a4f 26px,#5a6841 26px,#5a6841 52px);
   display:flex;align-items:flex-end;padding:14px;
