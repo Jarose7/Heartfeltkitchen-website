@@ -463,6 +463,7 @@ function buildAdminRouter(pool) {
           slug: slot.slug,
           label: slot.label,
           aspect: slot.aspect,
+          group: slot.group,
           hasOverride: Boolean(overrideAt),
           photoUrl: overrideAt ? homepagePhotoUrl(slot.slug, overrideAt) : slot.fallback,
         };

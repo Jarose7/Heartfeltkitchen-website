@@ -245,15 +245,35 @@
   }
 
   function renderHomepagePhotos(slots) {
-    hpList.innerHTML = slots.map((slot) => `
-      <div class="hp-card" data-slug="${slot.slug}">
-        <div class="hp-thumb" style="${slot.photoUrl ? `background-image:url('${slot.photoUrl}')` : ''}">${slot.photoUrl ? '' : '<span>No photo yet</span>'}</div>
-        <div class="hp-label">${escapeHtml(slot.label)}</div>
-        <div class="hp-actions">
-          <button class="hp-change-btn">Change Photo</button>
-          ${slot.hasOverride ? '<button class="hp-revert-btn">Revert to Original</button>' : ''}
-        </div>
-        <input type="file" accept="image/*" class="hp-photo-input" hidden>
+    // Slots render grouped under a heading per `group` (Homepage -- Hero,
+    // Homepage, About Page), in whichever order each group's slots first
+    // appear in the list -- which mirrors HOMEPAGE_PHOTO_SLOTS's own order
+    // server-side, so this needs no separate sort step.
+    const groups = [];
+    slots.forEach((slot) => {
+      const name = slot.group || 'Homepage';
+      let group = groups.find((g) => g.name === name);
+      if (!group) {
+        group = { name, slots: [] };
+        groups.push(group);
+      }
+      group.slots.push(slot);
+    });
+
+    hpList.innerHTML = groups.map((group) => `
+      <h2 class="form-section-label">${escapeHtml(group.name)}</h2>
+      <div class="hp-grid">
+        ${group.slots.map((slot) => `
+          <div class="hp-card" data-slug="${slot.slug}">
+            <div class="hp-thumb" style="${slot.photoUrl ? `background-image:url('${slot.photoUrl}')` : ''}">${slot.photoUrl ? '' : '<span>No photo yet</span>'}</div>
+            <div class="hp-label">${escapeHtml(slot.label)}</div>
+            <div class="hp-actions">
+              <button class="hp-change-btn">Change Photo</button>
+              ${slot.hasOverride ? '<button class="hp-revert-btn">Revert to Original</button>' : ''}
+            </div>
+            <input type="file" accept="image/*" class="hp-photo-input" hidden>
+          </div>
+        `).join('')}
       </div>
     `).join('');
 
