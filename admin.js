@@ -475,7 +475,21 @@ function buildAdminRouter(pool) {
     }
   });
 
-  router.put("/api/admin/homepage-photos/:slug", requireAdminApi, upload.single("photo"), async (req, res) => {
+  router.put("/api/admin/homepage-photos/:slug", requireAdminApi, (req, res, next) => {
+    // Wrapped (rather than passed straight to the router) so a multer
+    // rejection -- wrong file type, over the 5MB limit -- comes back as a
+    // clear JSON error instead of falling through to server.js's generic
+    // catch-all handler, which returns a plain-text page the client can't
+    // show a real reason for. Prompted by a 2026-10-15 report of "Failed
+    // to save this photo" on an iPad with no way to tell why.
+    upload.single("photo")(req, res, (err) => {
+      if (err) {
+        console.error(`Homepage photo upload rejected for slug=${req.params.slug}:`, err.message);
+        return res.status(400).json({ error: err.message || "That photo couldn't be uploaded." });
+      }
+      next();
+    });
+  }, async (req, res) => {
     const { slug } = req.params;
     if (!HOMEPAGE_PHOTO_SLOTS.some((slot) => slot.slug === slug)) {
       return res.status(404).json({ error: "Unknown homepage photo slot." });
@@ -489,6 +503,7 @@ function buildAdminRouter(pool) {
          ON CONFLICT (slug) DO UPDATE SET photo=EXCLUDED.photo, photo_mime=EXCLUDED.photo_mime, updated_at=now()`,
         [slug, req.file.buffer, req.file.mimetype]
       );
+      console.log(`Homepage photo saved: slug=${slug} mimetype=${req.file.mimetype} bytes=${req.file.size}`);
       res.json({ success: true });
     } catch (err) {
       console.error("Failed to save homepage photo:", err);

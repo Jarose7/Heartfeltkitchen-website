@@ -306,10 +306,25 @@
     formData.append('photo', blob, 'photo.jpg');
     try {
       const res = await fetch(`/api/admin/homepage-photos/${slug}`, { method: 'PUT', body: formData });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        // Pull out whatever reason the server actually gave (wrong file
+        // type, too large, a DB error) instead of showing a one-size-fits
+        // -all message -- without this, "it failed" was all anyone could
+        // report back, with no way to tell why.
+        let detail = '';
+        try {
+          const data = await res.json();
+          detail = data.error || '';
+        } catch (e) {
+          detail = `server returned ${res.status}`;
+        }
+        throw new Error(detail);
+      }
       loadHomepagePhotos();
     } catch (err) {
-      alert('Failed to save this photo. Try again.');
+      console.error('Failed to save homepage photo:', err);
+      const reason = (err.message || '').replace(/\.$/, '');
+      alert(`Failed to save this photo${reason ? ': ' + reason : ''}. Try again, or try a different photo.`);
     }
   }
 
