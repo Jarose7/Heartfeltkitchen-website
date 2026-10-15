@@ -42,11 +42,8 @@
   function clampPosition() {
     const w = naturalW * baseScale * scale;
     const h = naturalH * baseScale * scale;
-    // At scale 1 and above the image still covers the viewport on that
-    // axis — keep it pinned with no gaps, same as before. Below that
-    // (zoomed out past the photo's own edges) there's nothing to pan to,
-    // so just center it — the empty space around it becomes white padding
-    // when the crop is exported (see btnUse below).
+    // Scale is never below 1, so the image always covers the viewport on
+    // both axes; pin it so no gap can ever show.
     left = w >= viewportW ? clamp(left, viewportW - w, 0) : (viewportW - w) / 2;
     top = h >= viewportH ? clamp(top, viewportH - h, 0) : (viewportH - h) / 2;
   }
@@ -60,7 +57,9 @@
     const relX = (anchorX - left) / oldW;
     const relY = (anchorY - top) / oldH;
 
-    scale = clamp(newScale, 0.5, 3);
+    // Minimum 1 so the photo always fills the whole crop frame: zooming
+    // out past that used to export white padding bars into the saved photo.
+    scale = clamp(newScale, 1, 3);
 
     const newW = naturalW * baseScale * scale;
     const newH = naturalH * baseScale * scale;
