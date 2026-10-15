@@ -102,6 +102,8 @@ h1,h2{font-family:'Montserrat',sans-serif;font-weight:700;margin:0;}
 .hp-actions button:hover, .hp-actions label:hover{color:var(--cocoa);}
 .hp-actions .hp-revert-btn{color:#8a7862;}
 .hp-actions .hp-revert-btn:hover{color:var(--danger);}
+.hp-actions button:disabled{cursor:default;opacity:0.6;}
+.hp-actions button:disabled:hover{color:#6b5c4c;}
 /* Present in the DOM (not display:none via the hidden attribute) so a tap
    on its <label> reliably opens the native photo picker on every browser
    -- some WebKit/iOS versions silently ignore a JS .click() aimed at a

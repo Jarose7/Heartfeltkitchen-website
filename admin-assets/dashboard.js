@@ -269,6 +269,7 @@
             <div class="hp-label">${escapeHtml(slot.label)}</div>
             <div class="hp-actions">
               <label class="hp-change-btn" for="hp-file-${slot.slug}">Change Photo</label>
+              ${slot.photoUrl ? '<button type="button" class="hp-adjust-btn">Adjust Crop</button>' : ''}
               ${slot.hasOverride ? '<button type="button" class="hp-revert-btn">Revert to Original</button>' : ''}
             </div>
             <!-- A real label-for association, not a styled button that
@@ -299,6 +300,37 @@
           uploadHomepagePhoto(slug, blob);
         });
       });
+
+      // "Adjust Crop" re-opens the SAME photo already showing (whichever
+      // one that is -- an uploaded override, or still the original
+      // fallback image) in the crop tool, so repositioning or rezooming
+      // doesn't mean picking a file from scratch. Note this re-crops
+      // whatever is currently stored/shown, not some separate original --
+      // only the cropped result is ever kept, there's no uncropped source
+      // to go back to once a photo's been saved once.
+      const adjustBtn = card.querySelector('.hp-adjust-btn');
+      if (adjustBtn) {
+        adjustBtn.addEventListener('click', async () => {
+          const original = adjustBtn.textContent;
+          adjustBtn.textContent = 'Loading…';
+          adjustBtn.disabled = true;
+          try {
+            const res = await fetch(slot.photoUrl);
+            if (!res.ok) throw new Error(`server returned ${res.status}`);
+            const blob = await res.blob();
+            openImageCropper(blob, { aspect: slot.aspect }, (cropped) => {
+              if (!cropped) return; // canceled
+              uploadHomepagePhoto(slug, cropped);
+            });
+          } catch (err) {
+            console.error('Failed to load this photo for cropping:', err);
+            alert("Couldn't load this photo to adjust its crop. Try again.");
+          } finally {
+            adjustBtn.textContent = original;
+            adjustBtn.disabled = false;
+          }
+        });
+      }
 
       const revertBtn = card.querySelector('.hp-revert-btn');
       if (revertBtn) {
