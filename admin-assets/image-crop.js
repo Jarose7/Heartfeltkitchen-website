@@ -186,6 +186,14 @@
     outputW = opts.outputWidth || 1200;
     outputH = opts.outputHeight || Math.round(outputW / opts.aspect);
 
+    // The crop frame itself must match the slot's aspect ratio. It was
+    // hardcoded to 4:3 in CSS, so for portrait (3:4) slots the tool showed a
+    // landscape frame but exported a portrait file, and the extra area below
+    // the frame came out as white. Tall frames are width-capped so they fit
+    // on screen.
+    viewport.style.aspectRatio = String(opts.aspect);
+    viewport.style.width = opts.aspect < 1 ? `min(100%, ${Math.round(60 * opts.aspect)}vh)` : '100%';
+
     const url = URL.createObjectURL(file);
     imgEl.onload = () => {
       // The modal (and therefore the viewport inside it) must actually be
