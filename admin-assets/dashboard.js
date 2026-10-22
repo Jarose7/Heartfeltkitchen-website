@@ -317,7 +317,7 @@
           try {
             const res = await fetch(slot.photoUrl);
             if (!res.ok) throw new Error(`server returned ${res.status}`);
-            const blob = await res.blob();
+            const blob = await trimWhitePadding(await res.blob());
             openImageCropper(blob, { aspect: slot.aspect }, (cropped) => {
               if (!cropped) return; // canceled
               uploadHomepagePhoto(slug, cropped);
@@ -337,6 +337,50 @@
         revertBtn.addEventListener('click', () => revertHomepagePhoto(slug, slot.label));
       }
     });
+  }
+
+  // Photos saved before the crop tool's zoom-out limit was removed can have
+  // solid white bars baked into them (a landscape photo sitting on a white
+  // portrait canvas). Re-cropping that file in "Adjust Crop" would treat the
+  // white as part of the picture, so the bars would survive no matter how it
+  // was cropped. This trims fully-white rows/columns off the edges first, so
+  // the cropper starts from just the real photo. Only trims when the white
+  // band is at least 3% of that dimension, and only rows/columns that are
+  // white across their ENTIRE length, so normal photos pass through untouched.
+  async function trimWhitePadding(blob) {
+    try {
+      const bitmap = await createImageBitmap(blob);
+      const w = bitmap.width;
+      const h = bitmap.height;
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(bitmap, 0, 0);
+      const data = ctx.getImageData(0, 0, w, h).data;
+      const isWhite = (i) => data[i] >= 250 && data[i + 1] >= 250 && data[i + 2] >= 250;
+      const rowIsWhite = (y) => { for (let x = 0; x < w; x++) if (!isWhite((y * w + x) * 4)) return false; return true; };
+      const colIsWhite = (x) => { for (let y = 0; y < h; y++) if (!isWhite((y * w + x) * 4)) return false; return true; };
+
+      let top = 0, bottom = h - 1, left = 0, right = w - 1;
+      while (top < bottom && rowIsWhite(top)) top++;
+      while (bottom > top && rowIsWhite(bottom)) bottom--;
+      while (left < right && colIsWhite(left)) left++;
+      while (right > left && colIsWhite(right)) right--;
+
+      const newW = right - left + 1;
+      const newH = bottom - top + 1;
+      const trimmedMuch = (w - newW) >= w * 0.03 || (h - newH) >= h * 0.03;
+      if (!trimmedMuch || newW < 50 || newH < 50) return blob;
+
+      const out = document.createElement('canvas');
+      out.width = newW;
+      out.height = newH;
+      out.getContext('2d').drawImage(canvas, left, top, newW, newH, 0, 0, newW, newH);
+      return await new Promise((resolve) => out.toBlob((b) => resolve(b || blob), 'image/jpeg', 0.95));
+    } catch (err) {
+      return blob; // never block cropping over a failed trim
+    }
   }
 
   async function uploadHomepagePhoto(slug, blob) {
