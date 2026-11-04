@@ -4,9 +4,39 @@
 <meta charset="UTF-8">
 <title>Events | Heartfelt Kitchen &amp; Co.</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Weddings, birthdays, bridal showers, and private chef events in Canton, PA. Heartfelt Kitchen & Co. designs custom cakes and dessert experiences around your occasion.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
+<style>
+  .event-types-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:28px;}
+  .event-type-card{border:1px solid var(--line);}
+  .event-type-photo{
+    aspect-ratio:3/2;
+    background:repeating-linear-gradient(100deg,#5a3f2c,#5a3f2c 26px,#4a3123 26px,#4a3123 52px);
+    display:flex;align-items:flex-end;padding:18px;
+  }
+  .event-type-photo span{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--cream);background:rgba(58,38,24,0.6);padding:4px 9px;}
+  .event-type-body{padding:32px;}
+  .event-type-body .eyebrow{margin-bottom:10px;display:block;}
+  .event-type-body h3{font-size:20px;text-transform:uppercase;margin-bottom:10px;}
+  .event-type-body p{font-size:14.5px;color:#5a4433;line-height:1.65;}
+
+  .process{background:var(--cream);}
+  .process-intro{text-align:center;max-width:640px;margin:0 auto 56px;}
+  .process-intro h2{font-size:28px;text-transform:uppercase;margin-bottom:14px;}
+  .process-intro p{font-size:15px;color:#6b5c4c;}
+  .process-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
+  .process-step{border:1px solid var(--line);background:var(--white);padding:32px 28px;}
+  .process-step .step-num{font-family:'Montserrat',sans-serif;font-weight:800;font-size:38px;color:var(--tan);line-height:1;margin-bottom:16px;}
+  .process-step h3{font-size:14px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;}
+  .process-step p{font-size:14px;color:#6b5c4c;}
+
+  @media (max-width:900px){
+    .event-types-grid{grid-template-columns:1fr;}
+    .process-steps{grid-template-columns:1fr;}
+  }
+</style>
 </head>
 <body>
 
@@ -33,18 +63,102 @@
 
   <section class="page-hero">
     <div class="wrap">
-      <div class="eyebrow" style="margin-bottom:12px;">Weddings · Birthdays · Bridal Showers</div>
+      <div class="eyebrow" style="margin-bottom:12px;">Weddings · Birthdays · Bridal Showers · Private Events</div>
       <h1>Events</h1>
-      <p>Wedding cakes and custom celebration cakes, designed around your event. This page is still being built out. For now, submit an inquiry and Becca will follow up directly.</p>
+      <p>Custom cakes and dessert experiences designed around your occasion. Becca works with you on every detail — the cake, the spread, and everything in between.</p>
     </div>
   </section>
 
   <section class="wrap">
-    <div class="menu-note">
-      <p><strong>Page coming soon.</strong> Full event details, photo galleries, and pricing guidance will go here. In the meantime, tell us about your wedding, birthday party, or bridal shower and Becca will reach out with next steps.</p>
+    <div class="row-head">
+      <div>
+        <div class="eyebrow" style="margin-bottom:10px;">What We Do</div>
+        <h2>Find your occasion</h2>
+      </div>
     </div>
-    <a href="/contact" class="pill pill-solid">Start an Event Inquiry</a>
+    <div class="event-types-grid">
+
+      <div class="event-type-card">
+        <div class="event-type-photo">
+          <span>[Photo pending: wedding cake]</span>
+        </div>
+        <div class="event-type-body">
+          <span class="eyebrow">Weddings</span>
+          <h3>Wedding Cakes</h3>
+          <p>Becca designs and builds custom wedding cakes from scratch — multi-tiered, fondant, buttercream, or naked style. Bring a vision or bring questions; either way she'll make it work for your day, your venue, and your guest count.</p>
+        </div>
+      </div>
+
+      <div class="event-type-card">
+        <div class="event-type-photo">
+          <span>[Photo pending: birthday celebration]</span>
+        </div>
+        <div class="event-type-body">
+          <span class="eyebrow">Celebrations</span>
+          <h3>Birthdays &amp; Milestones</h3>
+          <p>From sculpted first-birthday smash cakes to fully themed adult celebration cakes, every order is made to order. No sheet cakes, no shortcuts — just a custom design built around the person and the moment.</p>
+        </div>
+      </div>
+
+      <div class="event-type-card">
+        <div class="event-type-photo">
+          <span>[Photo pending: dessert table setup]</span>
+        </div>
+        <div class="event-type-body">
+          <span class="eyebrow">Gatherings</span>
+          <h3>Bridal &amp; Baby Showers</h3>
+          <p>A full dessert table changes the room. Becca can build a spread around your theme — matching cupcakes, macarons, decorated cookies, and a centerpiece cake — all made from scratch and ready to be the focal point of your party.</p>
+        </div>
+      </div>
+
+      <div class="event-type-card">
+        <div class="event-type-photo">
+          <span>[Photo pending: private event setup]</span>
+        </div>
+        <div class="event-type-body">
+          <span class="eyebrow">Private Chef</span>
+          <h3>Private &amp; Special Events</h3>
+          <p>Becca is available for private chef engagements — intimate dinners, weekend retreats, and holiday gatherings. Full menu planning, preparation, and service. Available locally and for travel.</p>
+        </div>
+      </div>
+
+    </div>
   </section>
+
+  <section class="process">
+    <div class="wrap">
+      <div class="process-intro">
+        <div class="eyebrow" style="margin-bottom:14px;">How it works</div>
+        <h2>What to expect when you book Becca</h2>
+        <p>Every event starts with a conversation and ends with something made entirely by hand. Here's how the process works.</p>
+      </div>
+      <div class="process-steps">
+        <div class="process-step">
+          <div class="step-num">01</div>
+          <h3>Submit an Inquiry</h3>
+          <p>Tell Becca about your event — the date, occasion, rough guest count, and any ideas you have. She'll follow up within 48 hours to set up a consultation call.</p>
+        </div>
+        <div class="process-step">
+          <div class="step-num">02</div>
+          <h3>Design Together</h3>
+          <p>Becca works with you on the details: cake design, flavors, colors, and what the full spread looks like. If you have a Pinterest board, bring it. If you have no idea, she'll come with options.</p>
+        </div>
+        <div class="process-step">
+          <div class="step-num">03</div>
+          <h3>Everything Made by Hand</h3>
+          <p>Your order is baked from scratch in Becca's Canton kitchen — no premixes, no shortcuts. A 50% deposit confirms your date and covers the ingredients she secures for your order.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="banner">
+    <div>
+      <h2>Ready to book your event?</h2>
+      <p>Tell Becca about your occasion and she'll follow up with availability, pricing guidance, and next steps.</p>
+      <a href="/contact" class="pill" style="background:var(--tan);color:var(--cocoa);margin-top:24px;display:inline-flex;">Start an Event Inquiry</a>
+    </div>
+  </div>
 
   <footer>
     <div class="wrap">
