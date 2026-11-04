@@ -60,6 +60,13 @@ const ABOUT_FALLBACKS = {
   about_story_p3: "Selling baked goods was never really the point. Becca built Heartfelt Kitchen to be a place where people gather, celebrate, learn, and create around food.",
   about_philosophy_text: "Every cake, cookie box, and hands-on class comes from the same idea: food is better shared. Whether it's a wedding cake, a Saturday baking class, or a full catering spread, the goal is the same — bring people into the kitchen, not just send them home with a box.",
 };
+const EVENTS_FALLBACKS = {
+  events_hero_text: "Whether it's a wedding cake or a full dessert table, Becca designs everything around the event. Tell her what you're thinking and she'll take it from there.",
+  events_wedding_desc: "Becca designs custom wedding cakes from scratch. She works in fondant, buttercream, and rustic styles. Bring a reference photo, or just come with questions. She'll make it work.",
+  events_birthday_desc: "Smash cakes, sculpted designs, fully themed adult cakes. Every order is custom, built around the person. Becca doesn't do sheet cakes or generic designs. Tell her what you have in mind.",
+  events_shower_desc: "A good dessert table changes the whole setup of a party. Becca builds them around your theme: cupcakes, macarons, decorated cookies, a centerpiece cake. All from scratch. It's usually what people remember most.",
+  events_private_desc: "Becca takes private chef bookings. Intimate dinners, weekend retreats, travel jobs. She handles the menu and the prep. If you want someone to actually cook for your event, not just drop food off, that's what this is.",
+};
 const POLICY_FALLBACKS = {
   policy_deposit_text: "This policy applies to custom cakes, wedding cakes, and event orders booked directly with Becca.\n\n- A 50% deposit is required to book and confirm your order.\n- The remaining balance is due at pickup or delivery.\n- Your deposit is **non-refundable**, regardless of when you cancel — it covers ingredient costs secured for your order as soon as it's booked.",
   policy_allergen_text: "Our products are made in a kitchen that also handles wheat, dairy, eggs, tree nuts, peanuts, and soy. While we take care in preparing every order, we cannot guarantee that any item is completely free of allergens due to shared equipment and the possibility of cross-contact.\n\nIf you have a food allergy or dietary restriction, please let us know before ordering so we can talk through what will and won't work for you.",
@@ -70,6 +77,16 @@ const POLICY_FALLBACKS = {
 async function buildPageExtras(route, content, pool) {
   if (route === "/") {
     return { RAW_HOMEPAGE_PHOTOS_CSS: await getHomepagePhotosCss(pool, "/") };
+  }
+  if (route === "/events") {
+    return {
+      RAW_EVENTS_PHOTOS_CSS: await getHomepagePhotosCss(pool, "/events"),
+      RAW_EVENTS_HERO: textBlockToHtml(content.events_hero_text, EVENTS_FALLBACKS.events_hero_text),
+      RAW_EVENTS_WEDDING_DESC: textBlockToHtml(content.events_wedding_desc, EVENTS_FALLBACKS.events_wedding_desc),
+      RAW_EVENTS_BIRTHDAY_DESC: textBlockToHtml(content.events_birthday_desc, EVENTS_FALLBACKS.events_birthday_desc),
+      RAW_EVENTS_SHOWER_DESC: textBlockToHtml(content.events_shower_desc, EVENTS_FALLBACKS.events_shower_desc),
+      RAW_EVENTS_PRIVATE_DESC: textBlockToHtml(content.events_private_desc, EVENTS_FALLBACKS.events_private_desc),
+    };
   }
   if (route === "/about") {
     return {
