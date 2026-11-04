@@ -54,6 +54,9 @@
     .cal-event-chip{animation:none;}
     .cal-grid.anim-next,.cal-grid.anim-prev{animation:none;}
   }
+
+  /* Safety net: .pill sets display which overrides the [hidden] attribute */
+  [hidden]{display:none!important;}
 </style>
 </head>
 <body>
