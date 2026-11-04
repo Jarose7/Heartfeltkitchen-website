@@ -74,7 +74,7 @@ section{padding:88px 0;}
 .cat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;}
 .cat-card{position:relative;}
 .cat-photo{
-  aspect-ratio:3/4;
+  aspect-ratio:1/1;
   background:repeating-linear-gradient(100deg,#5a3f2c,#5a3f2c 26px,#4a3123 26px,#4a3123 52px);
   margin-bottom:12px;
 }
