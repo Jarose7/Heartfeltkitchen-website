@@ -265,7 +265,7 @@
       <div class="hp-grid">
         ${group.slots.map((slot) => `
           <div class="hp-card" data-slug="${slot.slug}">
-            <div class="hp-thumb" style="${slot.photoUrl ? `background-image:url('${slot.photoUrl}')` : ''}">${slot.photoUrl ? '' : '<span>No photo yet</span>'}</div>
+            <div class="hp-thumb" style="aspect-ratio:${slot.aspect};${slot.photoUrl ? `background-image:url('${slot.photoUrl}')` : ''}">${slot.photoUrl ? '' : '<span>No photo yet</span>'}</div>
             <div class="hp-label">${escapeHtml(slot.label)}</div>
             <div class="hp-actions">
               <label class="hp-change-btn" for="hp-file-${slot.slug}">Change Photo</label>
