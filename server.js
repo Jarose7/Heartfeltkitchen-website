@@ -61,9 +61,9 @@ const ABOUT_FALLBACKS = {
   about_philosophy_text: "Every cake, cookie box, and hands-on class comes from the same idea: food is better shared. Whether it's a wedding cake, a Saturday baking class, or a full catering spread, the goal is the same — bring people into the kitchen, not just send them home with a box.",
 };
 const EVENTS_FALLBACKS = {
-  events_hero_text: "Becca designs custom cakes and dessert spreads around your event. She works through every detail with you, from the first consultation through the finished order.",
+  events_hero_text: "Becca designs custom cakes and dessert spreads around your event. This starts from the first consultation and carries through to the finished order.",
   events_wedding_desc: "Becca designs and builds custom wedding cakes from scratch. She works in fondant, buttercream, and rustic styles. Reference photos are welcome but not required; she can work from whatever you bring to the consultation.",
-  events_birthday_desc: "Every order is custom and built around the occasion. Becca works in sculpted designs, fully themed cakes, and smash cakes for first birthdays. Standard sheet cakes are not available.",
+  events_birthday_desc: "Every order is custom and built around the occasion. Becca works in sculpted designs, fully themed cakes, and smash cakes for first birthdays. Sheet cakes are an option, though most clients choose something more tailored to the person.",
   events_shower_desc: "A full dessert table adds visual focus to a party. Becca designs them around the event theme: matching cupcakes, macarons, decorated cookies, and a centerpiece cake. Everything is made from scratch.",
   events_private_desc: "Becca is available for private chef engagements, including intimate dinners, weekend retreats, and travel bookings. She handles full menu planning and preparation. Inquire for availability and pricing.",
 };
