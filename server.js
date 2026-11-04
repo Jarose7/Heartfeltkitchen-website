@@ -61,11 +61,11 @@ const ABOUT_FALLBACKS = {
   about_philosophy_text: "Every cake, cookie box, and hands-on class comes from the same idea: food is better shared. Whether it's a wedding cake, a Saturday baking class, or a full catering spread, the goal is the same — bring people into the kitchen, not just send them home with a box.",
 };
 const EVENTS_FALLBACKS = {
-  events_hero_text: "Whether it's a wedding cake or a full dessert table, Becca designs everything around the event. Tell her what you're thinking and she'll take it from there.",
-  events_wedding_desc: "Becca designs custom wedding cakes from scratch. She works in fondant, buttercream, and rustic styles. Bring a reference photo, or just come with questions. She'll make it work.",
-  events_birthday_desc: "Smash cakes, sculpted designs, fully themed adult cakes. Every order is custom, built around the person. Becca doesn't do sheet cakes or generic designs. Tell her what you have in mind.",
-  events_shower_desc: "A good dessert table changes the whole setup of a party. Becca builds them around your theme: cupcakes, macarons, decorated cookies, a centerpiece cake. All from scratch. It's usually what people remember most.",
-  events_private_desc: "Becca takes private chef bookings. Intimate dinners, weekend retreats, travel jobs. She handles the menu and the prep. If you want someone to actually cook for your event, not just drop food off, that's what this is.",
+  events_hero_text: "Becca designs custom cakes and dessert spreads around your event. She works through every detail with you, from the first consultation through the finished order.",
+  events_wedding_desc: "Becca designs and builds custom wedding cakes from scratch. She works in fondant, buttercream, and rustic styles. Reference photos are welcome but not required; she can work from whatever you bring to the consultation.",
+  events_birthday_desc: "Every order is custom and built around the occasion. Becca works in sculpted designs, fully themed cakes, and smash cakes for first birthdays. Standard sheet cakes are not available.",
+  events_shower_desc: "A full dessert table adds visual focus to a party. Becca designs them around the event theme: matching cupcakes, macarons, decorated cookies, and a centerpiece cake. Everything is made from scratch.",
+  events_private_desc: "Becca is available for private chef engagements, including intimate dinners, weekend retreats, and travel bookings. She handles full menu planning and preparation. Inquire for availability and pricing.",
 };
 const POLICY_FALLBACKS = {
   policy_deposit_text: "This policy applies to custom cakes, wedding cakes, and event orders booked directly with Becca.\n\n- A 50% deposit is required to book and confirm your order.\n- The remaining balance is due at pickup or delivery.\n- Your deposit is **non-refundable**, regardless of when you cancel — it covers ingredient costs secured for your order as soon as it's booked.",
