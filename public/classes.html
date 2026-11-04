@@ -314,9 +314,12 @@
             detailSignup.href = ev.registration_url;
             detailSignup.hidden = false;
             detailInquiry.hidden = true;
-          } else {
+          } else if (ev.category === 'Class') {
             detailSignup.hidden = true;
             detailInquiry.hidden = false;
+          } else {
+            detailSignup.hidden = true;
+            detailInquiry.hidden = true;
           }
 
           detailModal.hidden = false;
