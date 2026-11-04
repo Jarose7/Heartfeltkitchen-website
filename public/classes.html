@@ -112,7 +112,8 @@
         <p class="evt-modal-when" id="evt-modal-when"></p>
         <p class="evt-modal-price" id="evt-modal-price"></p>
         <p class="evt-modal-desc" id="evt-modal-desc"></p>
-        <a href="/contact" class="pill pill-solid">Submit an Inquiry</a>
+        <a id="evt-modal-signup" href="#" target="_blank" rel="noopener" class="pill pill-solid" hidden>Sign Up</a>
+        <a id="evt-modal-inquiry" href="/contact" class="pill pill-solid">Submit an Inquiry</a>
       </div>
     </div>
   </div>
@@ -283,6 +284,8 @@
         const detailWhen = document.getElementById('evt-modal-when');
         const detailPrice = document.getElementById('evt-modal-price');
         const detailDesc = document.getElementById('evt-modal-desc');
+        const detailSignup = document.getElementById('evt-modal-signup');
+        const detailInquiry = document.getElementById('evt-modal-inquiry');
 
         function openEventDetail(ev) {
           detailCategory.textContent = ev.category;
@@ -306,6 +309,16 @@
           } else {
             detailPhoto.hidden = true;
           }
+
+          if (ev.registration_url) {
+            detailSignup.href = ev.registration_url;
+            detailSignup.hidden = false;
+            detailInquiry.hidden = true;
+          } else {
+            detailSignup.hidden = true;
+            detailInquiry.hidden = false;
+          }
+
           detailModal.hidden = false;
         }
 

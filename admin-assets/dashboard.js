@@ -918,6 +918,7 @@
     document.getElementById('event-date').value = event ? event.event_date : (dateStr || '');
     document.getElementById('event-start-time').value = event && event.start_time ? event.start_time.slice(0, 5) : '';
     document.getElementById('event-end-time').value = event && event.end_time ? event.end_time.slice(0, 5) : '';
+    document.getElementById('event-reg-url').value = event ? (event.registration_url || '') : '';
     document.getElementById('event-active').checked = event ? event.active : true;
 
     if (event && event.has_photo) {
@@ -984,6 +985,7 @@
       presetId: document.getElementById('event-preset-id').value,
       startTime: document.getElementById('event-start-time').value,
       endTime: document.getElementById('event-end-time').value,
+      regUrl: document.getElementById('event-reg-url').value,
     };
     const dateVal = document.getElementById('event-date').value;
     let nextDate = dateVal;
@@ -1003,6 +1005,7 @@
     document.getElementById('event-price').value = fields.price;
     document.getElementById('event-start-time').value = fields.startTime;
     document.getElementById('event-end-time').value = fields.endTime;
+    document.getElementById('event-reg-url').value = fields.regUrl;
 
     // Everything duplicated over is already valid, so skip straight to
     // the Schedule step — only the date usually needs changing. Back is
@@ -1045,6 +1048,7 @@
     formData.append('event_date', eventDate);
     formData.append('start_time', document.getElementById('event-start-time').value);
     formData.append('end_time', document.getElementById('event-end-time').value);
+    formData.append('registration_url', document.getElementById('event-reg-url').value);
     formData.append('active', document.getElementById('event-active').checked ? 'true' : 'false');
     if (croppedEventPhotoBlob) formData.append('photo', croppedEventPhotoBlob, 'photo.jpg');
 

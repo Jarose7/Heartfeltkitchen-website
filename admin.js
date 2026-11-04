@@ -183,7 +183,7 @@ function buildAdminRouter(pool) {
     try {
       const { start, end } = monthRangeWithPadding(req.query.month);
       const result = await pool.query(
-        `SELECT id, category, title, description, price_text, to_char(event_date, 'YYYY-MM-DD') AS event_date, start_time, end_time, updated_at,
+        `SELECT id, category, title, description, price_text, registration_url, to_char(event_date, 'YYYY-MM-DD') AS event_date, start_time, end_time, updated_at,
                 (photo IS NOT NULL) AS has_photo
          FROM class_events
          WHERE active = true AND event_date BETWEEN $1 AND $2
@@ -629,7 +629,7 @@ function buildAdminRouter(pool) {
     try {
       const { start, end } = monthRangeWithPadding(req.query.month);
       const result = await pool.query(
-        `SELECT id, preset_id, category, title, description, price_text, to_char(event_date, 'YYYY-MM-DD') AS event_date, start_time, end_time,
+        `SELECT id, preset_id, category, title, description, price_text, registration_url, to_char(event_date, 'YYYY-MM-DD') AS event_date, start_time, end_time,
                 active, (photo IS NOT NULL) AS has_photo, updated_at
          FROM class_events
          WHERE event_date BETWEEN $1 AND $2
@@ -644,15 +644,15 @@ function buildAdminRouter(pool) {
   });
 
   router.post("/api/admin/class-events", requireAdminApi, upload.single("photo"), async (req, res) => {
-    const { preset_id, category, title, description, price_text, event_date, start_time, end_time, active } = req.body;
+    const { preset_id, category, title, description, price_text, registration_url, event_date, start_time, end_time, active } = req.body;
     if (!category || !title || !event_date) {
       return res.status(400).json({ error: "Category, title, and date are required." });
     }
     try {
       const result = await pool.query(
         `INSERT INTO class_events
-           (preset_id, category, title, description, price_text, photo, photo_mime, event_date, start_time, end_time, active, updated_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11, now())
+           (preset_id, category, title, description, price_text, registration_url, photo, photo_mime, event_date, start_time, end_time, active, updated_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12, now())
          RETURNING id`,
         [
           preset_id || null,
@@ -660,6 +660,7 @@ function buildAdminRouter(pool) {
           title,
           description || null,
           price_text || null,
+          registration_url || null,
           req.file ? req.file.buffer : null,
           req.file ? req.file.mimetype : null,
           event_date,
@@ -677,29 +678,29 @@ function buildAdminRouter(pool) {
 
   router.put("/api/admin/class-events/:id", requireAdminApi, upload.single("photo"), async (req, res) => {
     const { id } = req.params;
-    const { preset_id, category, title, description, price_text, event_date, start_time, end_time, active } = req.body;
+    const { preset_id, category, title, description, price_text, registration_url, event_date, start_time, end_time, active } = req.body;
     if (!category || !title || !event_date) {
       return res.status(400).json({ error: "Category, title, and date are required." });
     }
     try {
       if (req.file) {
         await pool.query(
-          `UPDATE class_events SET preset_id=$1, category=$2, title=$3, description=$4, price_text=$5,
-             photo=$6, photo_mime=$7, event_date=$8, start_time=$9, end_time=$10, active=$11, updated_at=now()
-           WHERE id=$12`,
+          `UPDATE class_events SET preset_id=$1, category=$2, title=$3, description=$4, price_text=$5, registration_url=$6,
+             photo=$7, photo_mime=$8, event_date=$9, start_time=$10, end_time=$11, active=$12, updated_at=now()
+           WHERE id=$13`,
           [
-            preset_id || null, category, title, description || null, price_text || null,
+            preset_id || null, category, title, description || null, price_text || null, registration_url || null,
             req.file.buffer, req.file.mimetype, event_date, start_time || null, end_time || null,
             active === "false" ? false : true, id,
           ]
         );
       } else {
         await pool.query(
-          `UPDATE class_events SET preset_id=$1, category=$2, title=$3, description=$4, price_text=$5,
-             event_date=$6, start_time=$7, end_time=$8, active=$9, updated_at=now()
-           WHERE id=$10`,
+          `UPDATE class_events SET preset_id=$1, category=$2, title=$3, description=$4, price_text=$5, registration_url=$6,
+             event_date=$7, start_time=$8, end_time=$9, active=$10, updated_at=now()
+           WHERE id=$11`,
           [
-            preset_id || null, category, title, description || null, price_text || null,
+            preset_id || null, category, title, description || null, price_text || null, registration_url || null,
             event_date, start_time || null, end_time || null, active === "false" ? false : true, id,
           ]
         );
